@@ -32,15 +32,16 @@ List and define key classes with their attributes and methods
 ![Comparaison](docs/External_Internal.png)
 
 #  5. Plan SCM and QA Strategies
+## SCM Strategy
 
-## 1. Version Control System:
+### 1. Version Control System:
 Tool: Git
 Hosting: GitHub
-## 2. Branching Strategy:
+### 2. Branching Strategy:
 
 Main Branch (main): Production-ready code only
 Feature Branches (feature): Created from dev for individual tasks or features.
-## 3. Code Management:
+### 3. Code Management:
 
 Regular Commits: Commit changes frequently with descriptive messages.
 Pull Requests (or Merge requests):
@@ -49,15 +50,15 @@ At least one code reviewer must approve before merging.
 Code Reviews:
 Focus on code quality, performance, readability, and security.
 Use templates and checklists to ensure consistency.
-QA Strategy
+## QA Strategy
 
-## 1. Types of Tests:
+### 1. Types of Tests:
 
 Unit Tests: For individual functions/components (example with Jest )
 Integration Tests: Ensure modules interact correctly (example with Postman)
 Manual Testing: For critical paths, exploratory testing, or UI validations.
 
-## 2. Testing Tools:
+### 2. Testing Tools:
 
 Jest: For unit testing JavaScript/TypeScript code.
 Postman: For API integration testing.
