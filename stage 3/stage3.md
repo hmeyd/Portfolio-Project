@@ -1,10 +1,12 @@
 # 0. Define User Stories and Mockups
-Voici les user stories selon la méthode MoSCoW :
-·Must Have: En tant qu’agent Crédit Agricole, je veux rechercher une entreprise par son Nom pour consulter ses informations officielles.
-·Must Have: En tant qu’utilisateur, je veux voir les documents légaux liés à une entreprise pour vérifier sa situation.
-·Won’t Have: En tant qu’utilisateur, je veux pouvoir me connecter pour avoir accès aux données.
+🎯 User Stories (MoSCoW Method)
+Must Have: As a Crédit Agricole agent, I want to search for a company by its name in order to view its official information.
 
-voici La maquette Figma du projet
+Must Have: As a user, I want to see the legal documents associated with a company in order to verify its status.
+
+Won’t Have: As a user, I do not want to be required to log in to access the data.
+
+### voici La maquette Figma du projet
 https://www.figma.com/design/aJd9qZwNbJ8pIDjExuP0z1/Plateforme?node-id=2001-2&t=uMqQiBe2Tn0UWTGB-0
 
 # 1. Design System Architecture
@@ -15,15 +17,15 @@ Diagramme d’architecture du système :
 List and define key classes with their attributes and methods
 ![Téléchargement](docs/List.png)
 
-## 3. 🔍 Recherche d’une entreprise par son SIREN
+## 3. 🔍 Search for a company by its SIREN number
 
 ![Recherche entreprise](docs/recherche_siren.png)
 
-## 📄 Téléchargement de documents BODACC
+## 📄 📄 Download BODACC Documents
 
 ![Téléchargement](docs/documents_bodacc.png)
 
-## 📊 Comparaison de deux entreprises
+## 📊 Comparison Between Two Companies
 
 ![Comparaison](docs/comparaison.png)
 
