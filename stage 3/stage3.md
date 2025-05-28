@@ -65,3 +65,11 @@ Manual Testing: For critical paths, exploratory testing, or UI validations.
 Jest: For unit testing JavaScript/TypeScript code.
 Postman: For API integration testing.
 ESLint : For code linting and formatting.
+
+
+# 6. Technical Justifications
+- React : framework moderne pour créer une interface utilisateur 
+dynamique.
+- Flask : framework léger en Python pour construire des APIs rapidement.
+- PostgreSQL : base de données relationnelle robuste.
+- API Sirene : source officielle et gratuite d’informations d’entreprise.
