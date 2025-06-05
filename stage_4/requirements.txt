@@ -1,0 +1,10 @@
+import requests
+
+def get_company_by_siret(siret):
+    token = "VOTRE_TOKEN_OAUTH"
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    url = f"https://api.insee.fr/entreprises/sirene/V3/siret/{siret}"
+    response = requests.get(url, headers=headers)
+    return response.json()
