@@ -10,7 +10,7 @@ load_dotenv()
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TOKEN_URL = "https://api.insee.fr/token"
-API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siren/{siren}"
+API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siret/{siret}"
 
 app = Flask(__name__)
 
@@ -32,35 +32,48 @@ def get_access_token():
 @app.route("/", methods=["GET", "POST"])
 def search_company():
     if request.method == "POST":
-        siren = request.form.get("siren")
-        print("Valeur du SIREN reçu :", siren)
-        if not siren or not siren.isdigit() or len(siren) != 9:
-            return render_template("results.html", unite=None, periode=None, siren=None, error="Numéro SIREN invalide.")
+        siret = request.form.get("siret")
+        print(f"[DEBUG] SIRET saisi : {siret}")
+
+        if not siret or not siret.isdigit() or len(siret) != 14:
+            print("[DEBUG] Numéro SIRET invalide.")
+            return render_template("results.html", data=None, error="Numéro SIRET invalide.")
 
         token = get_access_token()
+        print(f"[DEBUG] Token récupéré : {token}")
+
         if not token:
-            return render_template("results.html", unite=None, periode=None, siren=None, error="Impossible de récupérer le jeton.")
+            print("[DEBUG] Impossible d'obtenir le token.")
+            return render_template("results.html", data=None, error="Erreur d'authentification.")
 
         headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json"
         }
 
-        url = API_SIRENE_URL.format(siren=siren)
+        # ✅ Utilisation de l’URL corrigée
+        url = API_SIRENE_URL.format(siret=siret)
+        print(f"[DEBUG] URL appelée : {url}")
 
         try:
             response = requests.get(url, headers=headers)
+            print(f"[DEBUG] Status code : {response.status_code}")
+            print(f"[DEBUG] Réponse brute : {response.text}")
+
             if response.status_code == 200:
                 json_data = response.json()
-                unite_legale = json_data.get("uniteLegale", {})
-                periode = unite_legale.get("periodesUniteLegale", [{}])[0]
-                return render_template("results.html", unite=unite_legale, periode=periode, siren=siren)
+                data = json_data.get("etablissement")
+                print(f"[DEBUG] Données établissement : {data}")
+                return render_template("results.html", data=data)
             elif response.status_code == 404:
-                return render_template("results.html", unite=None, periode=None, siren=siren, error="Entreprise non trouvée.")
+                print("[DEBUG] Établissement non trouvé.")
+                return render_template("results.html", data=None, error="Établissement non trouvé.")
             else:
-                return render_template("results.html", unite=None, periode=None, siren=siren, error=f"Erreur : {response.status_code}")
+                print(f"[DEBUG] Erreur inconnue : {response.status_code}")
+                return render_template("results.html", data=None, error=f"Erreur API : {response.status_code}")
         except requests.exceptions.RequestException as e:
-            return render_template("results.html", unite=None, periode=None, siren=siren, error=f"Erreur de connexion : {e}")
+            print(f"[DEBUG] Exception lors de la requête : {e}")
+            return render_template("results.html", data=None, error=f"Erreur de connexion : {e}")
 
     return render_template("search.html")
 

@@ -1,39 +1,49 @@
+import os
 import requests
+import base64
+from dotenv import load_dotenv
 
-ACCESS_TOKEN = "96b2de82-9878-3049-9dcd-e85a099714cf"
+load_dotenv()
 
-def get_company_data(siren):
-    url = f"https://api.insee.fr/entreprises/sirene/V3/siren"
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+def get_token():
+    credentials = f"{CLIENT_ID}:{CLIENT_SECRET}"
+    encoded_credentials = base64.b64encode(credentials.encode()).decode()
     headers = {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Authorization": f"Basic {encoded_credentials}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {"grant_type": "client_credentials"}
+
+    response = requests.post("https://api.insee.fr/token", headers=headers, data=data)
+    if response.status_code == 200:
+        token = response.json().get("access_token")
+        print("✅ Token obtenu :", token)
+        return token
+    else:
+        print("❌ Erreur récupération token:", response.status_code, response.text)
+        return None
+
+def fetch_etablissement(siret):
+    token = get_token()
+    if not token:
+        print("Impossible d’obtenir le token, arrêt du test.")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {token}",
         "Accept": "application/json"
     }
-    params = {
-        "q": f"siren:{siren}"
-    }
 
-    response = requests.get(url, headers=headers, params=params)
+    url = f"https://api.insee.fr/entreprises/sirene/V3/siret/{siret}"
+    print("🔎 URL appelée :", url)
 
-    if response.status_code == 200:
-        data = response.json()
-        # Le résultat est une liste dans 'etablissements'
-        etablissements = data.get('etablissements', [])
-        if etablissements:
-            entreprise = etablissements[0]
-            print("Dénomination sociale:", entreprise.get('uniteLegale', {}).get('denominationUniteLegale', 'N/A'))
-            print("SIREN:", entreprise.get('siren', 'N/A'))
-            print("Date début activité:", entreprise.get('uniteLegale', {}).get('dateCreationUniteLegale', 'N/A'))
-            adresse = entreprise.get('adresseEtablissement', {})
-            adresse_str = f"{adresse.get('numeroVoieEtablissement', '')} {adresse.get('typeVoieEtablissement', '')} {adresse.get('libelleVoieEtablissement', '')} {adresse.get('codePostalEtablissement', '')} {adresse.get('libelleCommuneEtablissement', '')}".strip()
-            print("Adresse siège:", adresse_str if adresse_str else "N/A")
-            print("Forme juridique:", entreprise.get('uniteLegale', {}).get('formeJuridiqueUniteLegale', 'N/A'))
-            print("Code APE:", entreprise.get('uniteLegale', {}).get('activitePrincipaleUniteLegale', 'N/A'))
-        else:
-            print("Aucune entreprise trouvée pour ce SIREN.")
-    else:
-        print(f"Erreur HTTP {response.status_code}")
-        print(response.text)
+    response = requests.get(url, headers=headers)
+    print("📦 Status code :", response.status_code)
+    print("📝 Réponse brute :", response.text)
 
 if __name__ == "__main__":
-    siren = "732829320"
-    get_company_data(siren)
+    siret_test = "73282932000074"  # <-- numéro SIRET valide à tester
+    fetch_etablissement(siret_test)

@@ -13,9 +13,18 @@
         <h1>Rechercher une entreprise</h1>
     </header>
 
-    <form method="POST">
-        <label for="siren">Numéro SIREN :</label>
-        <input type="text" name="siren" id="siren" required />
+    <form method="POST" novalidate>
+        <label for="siret">Numéro SIRET (14 chiffres) :</label>
+        <input 
+            type="text" 
+            name="siret" 
+            id="siret" 
+            required 
+            maxlength="14" 
+            pattern="\d{14}" 
+            placeholder="Exemple : 12345678901234"
+            title="Veuillez saisir un numéro SIRET valide à 14 chiffres"
+        />
         <button type="submit">Rechercher</button>
     </form>
 
