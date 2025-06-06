@@ -1,0 +1,28 @@
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body class="bg-light">
+    <div class="header">
+        <img src="logo.png" alt="Logo">
+        <h1 class="text-success">Résultat de recherche</h1>
+    </div>
+
+    <div class="container mt-5">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <h1 class="text-center text-success">Résultat de recherche</h1>
+        <div class="card shadow-sm p-4">
+            {% if data %}
+                <p><strong>SIREN :</strong> {{ data.siren }}</p>
+                <p><strong>Dénomination :</strong> {{ data.denomination }}</p>
+                <p><strong>Date de création :</strong> {{ data.date_creation }}</p>
+                <h2 class="mt-4 text-success">Adresse</h2>
+                <p><strong>Commune :</strong> {{ data.adresse.commune }}</p>
+                <p><strong>Code postal :</strong> {{ data.adresse.code_postal }}</p>
+            {% else %}
+                <p class="text-danger">Aucune entreprise trouvée.</p>
+            {% endif %}
+            <a href="/" class="btn btn-primary w-100 mt-3">Retour à la recherche</a>
+        </div>
+    </div>
+</body>
