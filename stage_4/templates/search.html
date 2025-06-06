@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recherche Entreprise</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="header-border"></div>
+
+    <header>
+        <h1>Rechercher une entreprise</h1>
+    </header>
+
+    <form method="POST">
+        <label for="siren">Numéro SIREN :</label>
+        <input type="text" name="siren" id="siren" required />
+        <button type="submit">Rechercher</button>
+    </form>
+
+    <!-- Animation des bulles -->
+    <div class="bubbles">
+        <span class="bubble"></span>
+        <span class="bubble"></span>
+        <span class="bubble"></span>
+        <span class="bubble"></span>
+        <span class="bubble"></span>
+    </div>
+
+    <!-- Bordure dégradée en bas -->
+    <footer class="footer-border"></footer>
+</body>
+</html>

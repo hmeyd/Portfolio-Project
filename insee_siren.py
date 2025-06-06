@@ -1,37 +1,39 @@
 import requests
 
-# Ton token Bearer obtenu
-token = "96b2de82-9878-3049-9dcd-e85a099714cf"
-siren = "552100554"
-url = f"https://api.insee.fr/entreprises/sirene/V3.11/siren/{siren}"
+ACCESS_TOKEN = "96b2de82-9878-3049-9dcd-e85a099714cf"
 
-headers = {
-    "Authorization": f"Bearer {token}"
-}
+def get_company_data(siren):
+    url = f"https://api.insee.fr/entreprises/sirene/V3/siren"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Accept": "application/json"
+    }
+    params = {
+        "q": f"siren:{siren}"
+    }
 
-response = requests.get(url, headers=headers)
-data = response.json()
+    response = requests.get(url, headers=headers, params=params)
 
-unite_legale = data.get("uniteLegale", {})
-periodes = unite_legale.get("periodesUniteLegale", [])
+    if response.status_code == 200:
+        data = response.json()
+        # Le résultat est une liste dans 'etablissements'
+        etablissements = data.get('etablissements', [])
+        if etablissements:
+            entreprise = etablissements[0]
+            print("Dénomination sociale:", entreprise.get('uniteLegale', {}).get('denominationUniteLegale', 'N/A'))
+            print("SIREN:", entreprise.get('siren', 'N/A'))
+            print("Date début activité:", entreprise.get('uniteLegale', {}).get('dateCreationUniteLegale', 'N/A'))
+            adresse = entreprise.get('adresseEtablissement', {})
+            adresse_str = f"{adresse.get('numeroVoieEtablissement', '')} {adresse.get('typeVoieEtablissement', '')} {adresse.get('libelleVoieEtablissement', '')} {adresse.get('codePostalEtablissement', '')} {adresse.get('libelleCommuneEtablissement', '')}".strip()
+            print("Adresse siège:", adresse_str if adresse_str else "N/A")
+            print("Forme juridique:", entreprise.get('uniteLegale', {}).get('formeJuridiqueUniteLegale', 'N/A'))
+            print("Code APE:", entreprise.get('uniteLegale', {}).get('activitePrincipaleUniteLegale', 'N/A'))
+        else:
+            print("Aucune entreprise trouvée pour ce SIREN.")
+    else:
+        print(f"Erreur HTTP {response.status_code}")
+        print(response.text)
 
-# Récupération des champs généraux
-siren_val = unite_legale.get("siren")
-date_creation = unite_legale.get("dateCreationUniteLegale")
-
-# On prend la première période (la plus récente)
-periode_recente = periodes[0] if periodes else {}
-
-denomination = periode_recente.get("denominationUniteLegale")
-activite = periode_recente.get("activitePrincipaleUniteLegale")
-etat_admin = periode_recente.get("etatAdministratifUniteLegale")
-
-result = {
-    "siren": siren_val,
-    "dateCreationUniteLegale": date_creation,
-    "denominationUniteLegale": denomination,
-    "activitePrincipaleUniteLegale": activite,
-    "etatAdministratifUniteLegale": etat_admin,
-}
-
-print(result)
+if __name__ == "__main__":
+    siren = "732829320"
+    get_company_data(siren)

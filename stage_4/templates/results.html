@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultat de recherche</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Résultat de recherche</h1>
+
+        {% if error %}
+            <p style="color: red;"><strong>{{ error }}</strong></p>
+        {% elif unite %}
+            <p><strong>SIREN :</strong> {{ siren }}</p>
+            <p><strong>Nom de l’entreprise :</strong> {{ periode.denominationUniteLegale or 'N/A' }}</p>
+            <p><strong>Activité principale :</strong> {{ periode.activitePrincipaleUniteLegale or 'N/A' }}</p>
+            <p><strong>État administratif :</strong> {{ periode.etatAdministratifUniteLegale or 'N/A' }}</p>
+            <p><strong>Date de création :</strong> {{ unite.dateCreationUniteLegale or 'N/A' }}</p>
+        {% else %}
+            <p>Aucune entreprise trouvée.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
