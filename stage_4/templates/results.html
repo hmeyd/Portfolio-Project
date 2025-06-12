@@ -32,6 +32,24 @@
             <p><strong>Effectif :</strong> {{ data.uniteLegale.trancheEffectifsUniteLegale or 'N/A' }}</p>
             <p><strong>Statut administratif :</strong> {{ data.uniteLegale.etatAdministratifUniteLegale or 'N/A' }}</p>
 
+            <!-- Affichage des dirigeants -->
+            <h2>Dirigeants</h2>
+            {% if dirigeants %}
+                <ul>
+                    {% for d in dirigeants %}
+                        <li>
+                            <strong>Nom :</strong> {{ d.nom or 'N/A' }},
+                            <strong>Prénom :</strong> {{ d.prenom or 'N/A' }}<br>
+                            <strong>Fonction :</strong> {{ d.fonction or 'N/A' }}<br>
+                            <strong>Date de nomination :</strong> {{ d.date_nomination or 'N/A' }}<br>
+                            <strong>Statut administratif :</strong> {{ d.statut_administratif or 'N/A' }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Aucun dirigeant trouvé.</p>
+            {% endif %}
+
         {% else %}
             <p>Aucune donnée à afficher.</p>
         {% endif %}
