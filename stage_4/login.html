@@ -1,40 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <header>
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
+    </header>
 
-  <header>
-    <img src="static/logo.png" class="logo" alt="App Logo" />
-  </header>
+    <main>
+        <h1>Login</h1>
 
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="login.html">Login</a>
-  </nav>
+        <form method="POST">
+            <label>Email:</label>
+            <input type="email" name="email" required>
 
-  <main>
-    <form id="login-form">
-      <h2>Login</h2>
-      
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required />
+            <label>Password:</label>
+            <input type="password" name="password" required>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-
-      <button type="submit">Login</button>
-    </form>
-  </main>
-
-  <footer>
-    <p>All rights reserved © 2025</p>
-  </footer>
-
-  <script src="scripts.js"></script>
+            <button type="submit">Se connecter</button>
+        </form>
+    </main>
 </body>
 </html>
