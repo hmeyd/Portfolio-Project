@@ -1,6 +1,8 @@
 import os
 import base64
 import requests
+import secrets  # Pour générer une clé aléatoire
+
 from flask import Flask, request, render_template, redirect, url_for, session
 from dotenv import load_dotenv
 
@@ -13,7 +15,9 @@ TOKEN_URL = "https://api.insee.fr/token"
 API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siret/{siret}"
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key")
+
+# 🔐 Générer une nouvelle clé secrète à chaque redémarrage
+app.secret_key = secrets.token_hex(16)
 
 # Login utilisateur fictif
 USERNAME = os.getenv("APP_USERNAME", "admin")
@@ -32,7 +36,7 @@ def get_access_token():
         return response.json().get("access_token")
     else:
         return None
-    
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -88,6 +92,6 @@ def search_company():
 
     return render_template("search.html")
 
-
 if __name__ == "__main__":
     app.run(debug=True)
+
