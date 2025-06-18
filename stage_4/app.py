@@ -87,6 +87,7 @@ def register():
 def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
+
 @app.route("/login_phone", methods=["GET", "POST"])
 def login_phone():
     if request.method == "POST":
