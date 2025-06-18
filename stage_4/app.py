@@ -40,10 +40,10 @@ def get_access_token():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
-        if username == USERNAME and password == PASSWORD:
-            session["user"] = username
+        if email == USERNAME and password == PASSWORD:
+            session["user"] = email
             return redirect(url_for("search_company"))
         else:
             return render_template("login.html", error="Identifiants incorrects.")
@@ -53,6 +53,42 @@ def login():
 def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot_password.html")
+
+    email = request.form.get("email")
+    if email != USERNAME:
+        return render_template("forgot_password.html", error="Email non trouvé.")
+
+    token = secrets.token_urlsafe(32)
+    session['reset_token'] = token
+    session['reset_expiration'] = True
+
+    reset_link = url_for("reset_password", token=token, _external=True)
+    print(f"[EMAIL SIMULÉ] Lien de réinitialisation : {reset_link}")
+
+    return render_template("forgot_password.html", message="Lien envoyé. Vérifiez la console.")
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    token = request.args.get("token") if request.method == "GET" else request.form.get("token")
+
+    if session.get('reset_token') != token:
+        return render_template("reset_password.html", error="Token invalide ou expiré.", token=token)
+
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        if new_password:
+            global PASSWORD
+            PASSWORD = new_password  # mise à jour simulée du mot de passe
+            session.pop('reset_token', None)
+            session.pop('reset_expiration', None)
+            return redirect(url_for("login"))
+
+    return render_template("reset_password.html", token=token)
 
 @app.route("/", methods=["GET", "POST"])
 def search_company():
@@ -94,4 +130,3 @@ def search_company():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
