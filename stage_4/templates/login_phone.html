@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion Téléphone</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="header-border"></div>
+
+  <div class="login-wrapper">
+    <div class="login-box">
+      <h1>Connexion avec téléphone</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-messages">
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login_phone') }}">
+        <label for="country_code">Pays</label>
+        <select name="country_code" id="country_code">
+          <option value="+33">🇫🇷 France (+33)</option>
+          <option value="+32">🇧🇪 Belgique (+32)</option>
+          <option value="+49">🇩🇪 Allemagne (+49)</option>
+        </select>
+
+        <label for="phone">Numéro de téléphone</label>
+        <input type="text" name="phone" id="phone" placeholder="612345678" required>
+
+        <label for="password">Mot de passe</label>
+        <input type="password" name="password" id="password" required>
+
+        <button type="submit" class="btn-login">Se connecter</button>
+      </form>
+
+      <footer class="login-footer">
+        <a href="#">Mot de passe oublié ?</a>
+      </footer>
+    </div>
+  </div>
+
+  <div class="footer-border"></div>
+
+</body>
+</html>
