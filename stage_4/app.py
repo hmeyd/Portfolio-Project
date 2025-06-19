@@ -2,12 +2,14 @@ import os
 import base64
 import requests
 import sqlite3
-import secrets  # Pour générer une clé aléatoire
+import secrets
 from flask import Flask, request, render_template, redirect, url_for, session, flash
-
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
+from flask_mail import Mail, Message
 
+# Charger les variables d'environnement
+load_dotenv()
 app = Flask(__name__)
 bcrypt = Bcrypt(app)            # ← Ici tu l'utilises (OK)
 app.secret_key = 'dev-secret' # ← Ici tu l'utilises (OK)
@@ -20,9 +22,19 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TOKEN_URL = "https://api.insee.fr/token"
 API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siret/{siret}"
+
+# Initialisation Flask
 app = Flask(__name__)
-# :closed_lock_with_key: Générer une nouvelle clé secrète à chaque redémarrage
 app.secret_key = secrets.token_hex(16)
+
+# Configuration Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
+mail = Mail(app)
 
 
 def get_access_token():
@@ -38,6 +50,7 @@ def get_access_token():
         return response.json().get("access_token")
     else:
         return None
+    
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -58,6 +71,7 @@ def login():
     return render_template("login.html")
 
 
+# Routes de base utilisateur
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -83,10 +97,12 @@ def register():
     return render_template("register.html")
 
 
+
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
+
 @app.route("/login_phone", methods=["GET", "POST"])
 def login_phone():
     if request.method == "POST":
@@ -110,6 +126,56 @@ def login_phone():
 
     return render_template("login_phone.html")
 
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = c.fetchone()
+        conn.close()
+        if not user:
+            return render_template("forgot_password.html", error="Email introuvable.")
+        
+        token = secrets.token_urlsafe(32)
+        session['reset_token'] = token
+        session['reset_email'] = email
+        reset_link = url_for("reset_password", token=token, _external=True)
+        
+        msg = Message("Réinitialisation de votre mot de passe", recipients=[email])
+        msg.body = f"Bonjour,\n\nVoici votre lien pour réinitialiser le mot de passe : {reset_link}\n\nCe lien est temporaire."
+        try:
+            mail.send(msg)
+            return render_template("forgot_password.html", message="Un lien a été envoyé à votre adresse email.")
+        except Exception as e:
+            print("Erreur d'envoi d'email :", e)
+            return render_template("forgot_password.html", error="Erreur lors de l'envoi du mail.")
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    token = request.args.get("token") if request.method == "GET" else request.form.get("token")
+    if session.get('reset_token') != token:
+        return render_template("reset_password.html", error="Token invalide ou expiré.", token=token)
+
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        if new_password:
+            hashed_pw = bcrypt.generate_password_hash(new_password).decode("utf-8")
+            email = session.get('reset_email')
+            conn = sqlite3.connect("users.db")
+            c = conn.cursor()
+            c.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_pw, email))
+            conn.commit()
+            conn.close()
+            session.pop('reset_token', None)
+            session.pop('reset_email', None)
+            flash("Mot de passe modifié avec succès.")
+            return redirect(url_for("login"))
+    return render_template("reset_password.html", token=token)
 
 @app.route("/", methods=["GET", "POST"])
 def search_company():
@@ -141,5 +207,6 @@ def search_company():
         except requests.exceptions.RequestException as e:
             return render_template("results.html", data=None, error=f"Erreur de connexion : {e}")
     return render_template("search.html")
+
 if __name__ == "__main__":
     app.run(debug=True)

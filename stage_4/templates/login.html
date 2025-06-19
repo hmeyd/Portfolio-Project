@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,9 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion - Plateforme Entreprise</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
 
 </head>
+
+<nav class="navbar">
+  <div class="navbar-container">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+  </div>
+</nav>
 <body>
 
   <div class="header-border"></div>
@@ -42,26 +48,14 @@
             <input type="checkbox" id="remember">
             <label for="remember">Se souvenir de mes identifiants</label>
           </div>
-          <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+          <a href="{{ url_for('forgot_password') }}" class="forgot-password">Mot de passe oublié ?</a>
         </div>
 
         <button type="submit" class="btn-login">S'identifier</button>
 
-        <div class="separator">Ou</div>
-
-        <button type="button" class="btn-alt">Se connecter avec le téléphone</button>
       </form>
 
-      <form method="POST" action="/login">
-  <label for="phone">Numéro de téléphone</label>
-  <input type="text" name="phone" required />
-
-  <label for="password">Mot de passe</label>
-  <input type="password" name="password" required />
-
-  <button type="submit" class="btn-login">Se connecter</button>
-</form>
-
+      
 
       <footer class="login-footer">
         <a href="#">Conditions d'utilisation</a> |

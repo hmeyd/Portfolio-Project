@@ -7,6 +7,30 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
+.siret-search {
+  width: 400px;              /* largeur du cadre */
+  margin: 40px auto;         /* centré horizontalement */
+  padding: 20px;             /* espace intérieur */
+  border: 2px solid #ccc;    /* bord gris clair */
+  border-radius: 10px;       /* coins arrondis */
+  background-color: #f9f9f9; /* fond clair */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* petite ombre */
+  position: center;          /* centré dans la page */
+  margin-top: 100px; /* espace au-dessus */
+}
+
+.siret-search input[type="text"] {
+  width: 100%;             /* prend toute la largeur du cadre */
+  max-width: 100%;         /* empêche de dépasser */
+  box-sizing: border-box;  /* inclut les bordures et padding dans la largeur */
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
 /*
 /* Barres de décoration */
 /*.header-border, .footer-border {
@@ -20,11 +44,34 @@ body {
 .header-border { top: 0; }
 .footer-border { bottom: 0; }
 /* Logo */
+
+.navbar {
+  background-color: #07261c;
+  padding: 10px 20px;
+  color: white;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-logout {
+  background-color: #e51a1a;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
 .logo {
-  width: 100px;
-  position: absolute;
-  top: 20px;
-  left: 20px;
+  width: 70px;
+  top: 70px;
+  left: 10px;
 }
 /* En-tête */
 header.header {
@@ -74,10 +121,10 @@ input[type="text"], input[type="email"], input[type="password"] {
   border-radius: 8px;
   font-size: 16px;
   width: 100%;
-  outline-color: #28A745;
+  outline-color: #061f0c;
 }
 button {
-  background-color: #28A745;
+  background-color: #073738;
   color: white;
   border: none;
   padding: 12px;
@@ -88,7 +135,7 @@ button {
   transition: background 0.2s ease-in-out;
 }
 button:hover {
-  background-color: #218838;
+  background-color: #0e4b1b;
 }
 /* Page de connexion */
 body {
@@ -99,8 +146,12 @@ body {
 }
 /* Barres décoratives */
 .footer-border {
-  height: 20px;
-  background: linear-gradient(90deg, #007B5E, #004445);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(90deg, #07261c, #004445);
 }
 /* Conteneur général */
 .login-wrapper {
@@ -124,6 +175,12 @@ body {
   color: #004445;
   margin-bottom: 10px;
 }
+
+header h1 {
+  color: #0c5039; /* Bleu par exemple */
+  text-align: center;
+}
+
 .register-link {
   font-size: 14px;
   margin-bottom: 15px;
@@ -194,9 +251,12 @@ input[type="email"], input[type="password"] {
   font-size: 12px;
   margin-top: 30px;
   color: #666;
+  text-align: center;
+  margin-top: 20px; /* optionnel, espace au-dessus */
+  font-size: 14px; 
 }
 .login-footer a {
-  color: #007B5E;
+  color: #07261c;
   margin: 0 5px;
   text-decoration: none;
 }
