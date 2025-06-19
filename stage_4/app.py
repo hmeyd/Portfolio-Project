@@ -88,30 +88,6 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-@app.route("/login_phone", methods=["GET", "POST"])
-def login_phone():
-    if request.method == "POST":
-        country_code = request.form["country_code"]
-        phone = request.form["phone"]
-        password = request.form["password"]
-        full_phone = country_code + phone
-
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE phone = ?", (full_phone,))
-        user = c.fetchone()
-        conn.close()
-
-        if user and bcrypt.check_password_hash(user[0], password):
-            session["user"] = full_phone
-            return redirect(url_for("search_company"))
-        else:
-            flash("Numéro ou mot de passe incorrect.", "error")
-            return render_template("login_phone.html")
-
-    return render_template("login_phone.html")
-
-
 @app.route("/", methods=["GET", "POST"])
 def search_company():
     # Vérifie si l'utilisateur est connecté

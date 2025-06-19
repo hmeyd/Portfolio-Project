@@ -14,10 +14,16 @@
     </header>
 
 <div class="main-container">
+ <div class="search-header">
+  <a href="{{ url_for('logout') }}" class="logout-link-top">Se déconnecter</a>
+  <img src="{{ url_for('static', filename='logo.png') }}" class="logo-top" alt="Logo">
+</div>
+
+<div class="main-container">
   <div class="search-box">
     <form method="POST">
       <label for="siret">Numéro SIRET (14 chiffres) :</label>
-      <input type="text" id="siret" name="siret" placeholder="Exemple : 12345678901234" required />
+      <input type="text" name="siret" id="siret" placeholder="Exemple : 12345678901234" required>
       <button type="submit" class="btn-submit">Rechercher</button>
     </form>
   </div>
