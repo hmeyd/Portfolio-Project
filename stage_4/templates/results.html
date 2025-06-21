@@ -53,6 +53,15 @@
         {% else %}
             <p>Aucune donnée à afficher.</p>
         {% endif %}
+        <!-- Cadre BODACC juste après dirigeants, sans CSS -->
+    <h2>Consulter les annonces BODACC</h2>
+   <form method="GET" action="{{ url_for('bodacc') }}">
+    <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
+    <button type="submit">Voir les annonces BODACC</button>
+</form>
+
+
     </div>
+    
 </body>
 </html>

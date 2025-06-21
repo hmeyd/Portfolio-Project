@@ -8,6 +8,13 @@ body {
   min-height: 100vh;
 }
 
+
+button {
+    padding: 8px;
+    cursor: pointer;
+    width: 100%;
+}
+
 .siret-search {
   width: 400px;              /* largeur du cadre */
   margin: 40px auto;         /* centré horizontalement */
@@ -21,6 +28,27 @@ body {
 }
 
 .siret-search input[type="text"] {
+  width: 100%;             /* prend toute la largeur du cadre */
+  max-width: 100%;         /* empêche de dépasser */
+  box-sizing: border-box;  /* inclut les bordures et padding dans la largeur */
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.boddac-search {
+  width: 400px;              /* largeur du cadre */
+  margin: 40px auto;         /* centré horizontalement */
+  padding: 20px;             /* espace intérieur */
+  border: 2px solid #ccc;    /* bord gris clair */
+  border-radius: 10px;       /* coins arrondis */
+  background-color: #f9f9f9; /* fond clair */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* petite ombre */
+  position: center;          /* centré dans la page */
+  margin-top: 100px; /* espace au-dessus */
+}
+
+.boddac-search input[type="text"] {
   width: 100%;             /* prend toute la largeur du cadre */
   max-width: 100%;         /* empêche de dépasser */
   box-sizing: border-box;  /* inclut les bordures et padding dans la largeur */
@@ -321,3 +349,21 @@ input[type="email"], input[type="password"] {
     left: 10px;
   }
 }
+
+
+.bodacc-box {
+    border: 1px solid #ccc;
+    padding: 1em;
+    margin-top: 2em;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 1px 1px 6px rgba(0,0,0,0.1);
+}
+.bodacc-box input {
+    padding: 0.5em;
+    margin-right: 0.5em;
+}
+.bodacc-box button {
+    padding: 0.5em 1em;
+}
+

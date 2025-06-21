@@ -3,6 +3,7 @@ import base64
 import requests
 import sqlite3
 import secrets
+import json
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
@@ -10,22 +11,17 @@ from flask_mail import Mail, Message
 
 # Charger les variables d'environnement
 load_dotenv()
+
 app = Flask(__name__)
-bcrypt = Bcrypt(app)            # ← Ici tu l'utilises (OK)
-app.secret_key = 'dev-secret' # ← Ici tu l'utilises (OK)
+bcrypt = Bcrypt(app)
+app.secret_key = secrets.token_hex(16)
 
-conn = sqlite3.connect("users.db")
-
-# Charger les variables d'environnement
-load_dotenv()
+# Variables d'environnement
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TOKEN_URL = "https://api.insee.fr/token"
 API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siret/{siret}"
-
-# Initialisation Flask
-app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
+BODACC_API_URL = "https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q="
 
 # Configuration Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -50,7 +46,8 @@ def get_access_token():
         return response.json().get("access_token")
     else:
         return None
-    
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -71,7 +68,6 @@ def login():
     return render_template("login.html")
 
 
-# Routes de base utilisateur
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -96,12 +92,6 @@ def register():
 
     return render_template("register.html")
 
-
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
 
 @app.route("/login_phone", methods=["GET", "POST"])
 def login_phone():
@@ -138,12 +128,12 @@ def forgot_password():
         conn.close()
         if not user:
             return render_template("forgot_password.html", error="Email introuvable.")
-        
+
         token = secrets.token_urlsafe(32)
         session['reset_token'] = token
         session['reset_email'] = email
         reset_link = url_for("reset_password", token=token, _external=True)
-        
+
         msg = Message("Réinitialisation de votre mot de passe", recipients=[email])
         msg.body = f"Bonjour,\n\nVoici votre lien pour réinitialiser le mot de passe : {reset_link}\n\nCe lien est temporaire."
         try:
@@ -177,18 +167,28 @@ def reset_password():
             return redirect(url_for("login"))
     return render_template("reset_password.html", token=token)
 
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("login"))
+
+
 @app.route("/", methods=["GET", "POST"])
 def search_company():
-    # Vérifie si l'utilisateur est connecté
     if "user" not in session:
         return redirect(url_for("login"))
+
     if request.method == "POST":
         siret = request.form.get("siret")
+
         if not siret or not siret.isdigit() or len(siret) != 14:
-            return render_template("results.html", data=None, error="Numéro SIRET invalide.")
+            return render_template("results.html", data=None, error="Numéro SIRET invalide. Il doit contenir 14 chiffres.")
+
         token = get_access_token()
         if not token:
-            return render_template("results.html", data=None, error="Erreur d'authentification.")
+            return render_template("results.html", data=None, error="Erreur d'authentification à l'API INSEE.")
+
         headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json"
@@ -197,8 +197,7 @@ def search_company():
         try:
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
-                json_data = response.json()
-                data = json_data.get("etablissement")
+                data = response.json().get("etablissement")
                 return render_template("results.html", data=data)
             elif response.status_code == 404:
                 return render_template("results.html", data=None, error="Établissement non trouvé.")
@@ -206,7 +205,84 @@ def search_company():
                 return render_template("results.html", data=None, error=f"Erreur API : {response.status_code}")
         except requests.exceptions.RequestException as e:
             return render_template("results.html", data=None, error=f"Erreur de connexion : {e}")
+
     return render_template("search.html")
+
+
+@app.route("/bodacc")
+def bodacc():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    siret_or_siren = request.args.get("siret", "").strip()
+
+    if not siret_or_siren or not siret_or_siren.isdigit() or len(siret_or_siren) not in (9, 14):
+        return render_template("bodacc.html", error="Numéro SIREN ou SIRET invalide.", results=None, siret=siret_or_siren)
+
+    siren = siret_or_siren[:9]  # Extraire le SIREN
+
+    url = f"{BODACC_API_URL}{siren}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        records = data.get("records", [])
+
+        results = []
+        for record in records:
+            fields = record.get("fields", {})
+            numero_annonce = fields.get("numeroannonce")
+            lien_bodacc = f"https://www.bodacc.fr/annonce/detail/{numero_annonce}" if numero_annonce else None
+
+            modifs_raw = fields.get("modificationsgenerales")
+            modifs_text = "N/A"
+            if modifs_raw:
+                try:
+                    modifs_dict = json.loads(modifs_raw)
+                    if isinstance(modifs_dict, dict):
+                        modifs_text = ", ".join(f"{k} : {v}" for k, v in modifs_dict.items())
+                    else:
+                        modifs_text = str(modifs_dict)
+                except Exception:
+                    modifs_text = str(modifs_raw)
+
+            results.append({
+    "date": fields.get("dateparution"),
+    "type_document": fields.get("familleavis_lib"),  # ou "type_document" selon l'API
+    "source": fields.get("tribunal"),
+    "type_avis": fields.get("typeavis_lib") or fields.get("typeavis"),
+    "reference": fields.get("numeroannonce"),
+    "description": modifs_text,  # Le texte analysé de modificationsgenerales
+    "contenu": fields.get("decision") or "",  # ou un autre champ pertinent
+    "lien": fields.get("url") or f"https://www.bodacc.fr/annonce/detail/{fields.get('numeroannonce')}",
+})
+
+        if not results:
+            return render_template("bodacc.html", error="Aucune annonce trouvée.", results=None, siret=siret_or_siren)
+
+        return render_template("bodacc.html", results=results, siret=siret_or_siren)
+
+    except requests.exceptions.RequestException as e:
+        return render_template("bodacc.html", error=f"Erreur lors de la récupération des données : {e}", results=None, siret=siret_or_siren)
+
+
+
+@app.route('/download')
+def download():
+    url = request.args.get('url')
+    if not url:
+        return "URL manquante", 400
+    try:
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+        headers = {
+            'Content-Disposition': 'attachment; filename=document.pdf',  # adapter le nom de fichier
+            'Content-Type': r.headers.get('Content-Type', 'application/octet-stream'),
+        }
+        return Response(r.iter_content(chunk_size=8192), headers=headers)
+    except requests.RequestException:
+        return "Erreur lors du téléchargement", 500
 
 if __name__ == "__main__":
     app.run(debug=True)
