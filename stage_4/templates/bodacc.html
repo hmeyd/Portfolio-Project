@@ -2,52 +2,61 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Annonces / Publications</title>
+  <title>Annonces BODACC</title>
 </head>
 <body>
-  <h1>Annonces / Publications</h1>
+  <h1>Recherche des annonces BODACC</h1>
+  
+  <form method="post" action="{{ url_for('bodacc') }}">
+    <label for="siret">Numéro SIRET ou SIREN :</label>
+    <input type="text" id="siret" name="siret" required
+           value="{{ siret if siret else '' }}"
+           placeholder="Exemple : 12345678900012 ou 123456789" />
+    <button type="submit">Rechercher</button>
+  </form>
 
   {% if error %}
     <p style="color:red;">{{ error }}</p>
   {% endif %}
 
   {% if results %}
-  <table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Date de publication</th>
-        <th>Type de document</th>
-        <th>Source</th>
-        <th>Type d’avis</th>
-        <th>Référence</th>
-        <th>Description</th>
-        <th>Contenu</th>
-        <th>Lien</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for annonce in results %}
-      <tr>
-        <td>{{ annonce.date | default('N/A') }}</td>
-        <td>{{ annonce.type_document | default('N/A') }}</td>
-        <td>{{ annonce.source | default('N/A') }}</td>
-        <td>{{ annonce.type_avis | default('N/A') }}</td>
-        <td>{{ annonce.reference | default('N/A') }}</td>
-        <td>{{ annonce.description | default('N/A') }}</td>
-        <td>{{ annonce.contenu | default('N/A') }}</td>
-        <td>
-          {% if annonce.lien %}
-            <a href="{{ annonce.lien }}" target="_blank">Voir</a>
-          {% else %}
-            N/A
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-    <p>Aucune annonce disponible.</p>
+    <h2>Résultats pour le SIREN {{ siret[:9] }}</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Date de publication</th>
+          <th>Type de document</th>
+          <th>Source</th>
+          <th>Type d’avis</th>
+          <th>Référence</th>
+          <th>Description</th>
+          <th>Contenu</th>
+          <th>Lien PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+          <tr>
+            <td>{{ r.date }}</td>
+            <td>{{ r.type_document }}</td>
+            <td>{{ r.source }}</td>
+            <td>{{ r.type_avis }}</td>
+            <td>{{ r.reference }}</td>
+            <td>{{ r.description }}</td>
+            <td>{{ r.contenu }}</td>
+            <td>
+              {% if r.pdf_url %}
+                <a href="{{ r.pdf_url }}" target="_blank" rel="noopener">Voir PDF</a>
+              {% else %}
+                N/A
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif siret %}
+    <p>Aucune annonce trouvée pour ce SIREN.</p>
   {% endif %}
 </body>
 </html>

@@ -21,7 +21,9 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TOKEN_URL = "https://api.insee.fr/token"
 API_SIRENE_URL = "https://api.insee.fr/entreprises/sirene/V3.11/siret/{siret}"
+
 BODACC_API_URL = "https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q="
+
 
 # Configuration Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -209,19 +211,26 @@ def search_company():
     return render_template("search.html")
 
 
-@app.route("/bodacc")
+from flask import render_template, request
+import requests
+
+@app.route("/bodacc", methods=["GET", "POST"])
 def bodacc():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    siret_or_siren = request.args.get("siret", "").strip()
+    siret_or_siren = None
+    if request.method == "POST":
+        siret_or_siren = request.form.get("siret", "").strip()
+    else:
+        siret_or_siren = request.args.get("siret", "").strip()
 
     if not siret_or_siren or not siret_or_siren.isdigit() or len(siret_or_siren) not in (9, 14):
         return render_template("bodacc.html", error="Numéro SIREN ou SIRET invalide.", results=None, siret=siret_or_siren)
 
-    siren = siret_or_siren[:9]  # Extraire le SIREN
+    siren = siret_or_siren[:9]
 
-    url = f"{BODACC_API_URL}{siren}"
+    url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=50&sort=dateparution"
 
     try:
         response = requests.get(url)
@@ -232,31 +241,37 @@ def bodacc():
         results = []
         for record in records:
             fields = record.get("fields", {})
-            numero_annonce = fields.get("numeroannonce")
-            lien_bodacc = f"https://www.bodacc.fr/annonce/detail/{numero_annonce}" if numero_annonce else None
 
-            modifs_raw = fields.get("modificationsgenerales")
-            modifs_text = "N/A"
-            if modifs_raw:
+            # Récupération du lien PDF — souvent dans 'url_pdf' ou 'pdf'
+            pdf_url = fields.get("url_pdf") or fields.get("pdf") or None
+            # Exemple de lien alternatif (en construisant une url vers bodacc.fr)
+            if not pdf_url and "numeroannonce" in fields:
+                pdf_url = f"https://www.bodacc.fr/annonce/pdf/{fields['numeroannonce']}"
+
+            # Description, on essaie d'extraire/modificationsgenerales
+            description = fields.get("modificationsgenerales", "")
+            if description:
                 try:
-                    modifs_dict = json.loads(modifs_raw)
-                    if isinstance(modifs_dict, dict):
-                        modifs_text = ", ".join(f"{k} : {v}" for k, v in modifs_dict.items())
+                    # Parfois c'est une chaîne JSON
+                    description = json.loads(description)
+                    if isinstance(description, dict):
+                        description = ", ".join(f"{k} : {v}" for k, v in description.items())
                     else:
-                        modifs_text = str(modifs_dict)
+                        description = str(description)
                 except Exception:
-                    modifs_text = str(modifs_raw)
+                    # Si erreur JSON, on garde la chaîne brute
+                    pass
 
             results.append({
-    "date": fields.get("dateparution"),
-    "type_document": fields.get("familleavis_lib"),  # ou "type_document" selon l'API
-    "source": fields.get("tribunal"),
-    "type_avis": fields.get("typeavis_lib") or fields.get("typeavis"),
-    "reference": fields.get("numeroannonce"),
-    "description": modifs_text,  # Le texte analysé de modificationsgenerales
-    "contenu": fields.get("decision") or "",  # ou un autre champ pertinent
-    "lien": fields.get("url") or f"https://www.bodacc.fr/annonce/detail/{fields.get('numeroannonce')}",
-})
+                "date": fields.get("dateparution", "N/A"),
+                "type_document": fields.get("familleavis_lib", "N/A"),
+                "source": fields.get("tribunal", "N/A"),
+                "type_avis": fields.get("typeavis_lib") or fields.get("typeavis", "N/A"),
+                "reference": fields.get("numeroannonce", "N/A"),
+                "description": description or "N/A",
+                "contenu": fields.get("decision", "N/A"),
+                "pdf_url": pdf_url,
+            })
 
         if not results:
             return render_template("bodacc.html", error="Aucune annonce trouvée.", results=None, siret=siret_or_siren)
@@ -265,7 +280,6 @@ def bodacc():
 
     except requests.exceptions.RequestException as e:
         return render_template("bodacc.html", error=f"Erreur lors de la récupération des données : {e}", results=None, siret=siret_or_siren)
-
 
 
 @app.route('/download')
