@@ -82,6 +82,10 @@ def register():
 
     return render_template("register.html")
 
+@app.route('/dashboard')
+def dashboard():
+    statut_values = [82, 18]  # ou des vraies données
+    return render_template('dashboard.html', statut_values=statut_values)
 
 @app.route("/logout")
 def logout():
