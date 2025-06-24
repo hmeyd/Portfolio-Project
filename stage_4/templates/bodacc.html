@@ -1,62 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Annonces BODACC</title>
+    <meta charset="UTF-8" />
+    <title>Annonces BODACC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <h1>Recherche des annonces BODACC</h1>
-  
-  <form method="post" action="{{ url_for('bodacc') }}">
-    <label for="siret">Numéro SIRET ou SIREN :</label>
-    <input type="text" id="siret" name="siret" required
-           value="{{ siret if siret else '' }}"
-           placeholder="Exemple : 12345678900012 ou 123456789" />
-    <button type="submit">Rechercher</button>
-  </form>
+    <h1>Annonces BODACC</h1>
 
-  {% if error %}
-    <p style="color:red;">{{ error }}</p>
-  {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-  {% if results %}
-    <h2>Résultats pour le SIREN {{ siret[:9] }}</h2>
-    <table border="1" cellpadding="5" cellspacing="0">
-      <thead>
-        <tr>
-          <th>Date de publication</th>
-          <th>Type de document</th>
-          <th>Source</th>
-          <th>Type d’avis</th>
-          <th>Référence</th>
-          <th>Description</th>
-          <th>Contenu</th>
-          <th>Lien PDF</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in results %}
-          <tr>
-            <td>{{ r.date }}</td>
-            <td>{{ r.type_document }}</td>
-            <td>{{ r.source }}</td>
-            <td>{{ r.type_avis }}</td>
-            <td>{{ r.reference }}</td>
-            <td>{{ r.description }}</td>
-            <td>{{ r.contenu }}</td>
-            <td>
-              {% if r.pdf_url %}
-                <a href="{{ r.pdf_url }}" target="_blank" rel="noopener">Voir PDF</a>
-              {% else %}
-                N/A
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% elif siret %}
-    <p>Aucune annonce trouvée pour ce SIREN.</p>
-  {% endif %}
+    <form method="post" action="{{ url_for('bodacc') }}">
+        <label for="siret">SIREN ou SIRET :</label>
+        <input type="text" id="siret" name="siret" value="{{ request.form.siret or request.args.get('siren', '') }}" required>
+        <button type="submit">Rechercher</button>
+        <button type="submit" name="see_recent" value="1">Voir les annonces récentes</button>
+    </form>
+
+    {% if results %}
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Date de parution</th>
+                    <th>Type d'avis</th>
+                    <th>Tribunal</th>
+                    <th>Référence</th>
+                    <th>Description</th>
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for annonce in results %}
+                    <tr>
+                        <td>{{ annonce.date_parution }}</td>
+                        <td>{{ annonce.type_avis or annonce.type_document }}</td>
+                        <td>{{ annonce.tribunal or annonce.source }}</td>
+                        <td>{{ annonce.reference or annonce.numeroannonce or '' }}</td>
+                        <td>{{ annonce.description }}</td>
+                        <td>
+                            {% if annonce.pdf_url %}
+                                <a href="{{ annonce.pdf_url }}" target="_blank">Télécharger PDF</a>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucune annonce à afficher.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('logout') }}">Se déconnecter</a></p>
 </body>
 </html>
