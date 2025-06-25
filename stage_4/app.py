@@ -1,3 +1,4 @@
+
 import os
 import base64
 import requests
@@ -35,15 +36,22 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
 mail = Mail(app)
 
 def get_access_token():
-    credentials = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    encoded_credentials = base64.b64encode(credentials.encode()).decode()
-    headers = {
-        "Authorization": f"Basic {encoded_credentials}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {"grant_type": "client_credentials"}
-    response = requests.post(TOKEN_URL, headers=headers, data=data)
-    return response.json().get("access_token") if response.status_code == 200 else None
+    client_id = "XIZpcDln6Lqu_F7kRAIkt5PZ5TYa"
+    client_secret = "NpZMeG_wz_p99RhJRE2kCd4NW3Ma"
+    token_url = "https://api.insee.fr/token"
+
+    response = requests.post(
+        token_url,
+        auth=(client_id, client_secret),
+        data={"grant_type": "client_credentials"}
+    )
+
+    if response.status_code == 200:
+        return response.json().get("access_token")
+    else:
+        print("Erreur lors de la récupération du token :", response.status_code, response.text)
+        return None
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -170,11 +178,11 @@ def search_company():
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 data = response.json().get("etablissement", {})
-                siren = data.get("siren", "")
-                if not siren:
+                siret = data.get("siret", "")
+                if not siret:
                     return render_template("search.html", error="Impossible de récupérer le SIREN à partir du SIRET.")
                 # Redirection vers bodacc avec le siren récupéré
-                return redirect(url_for("bodacc", siren=siren))
+                return render_template("results.html", data=data)
             elif response.status_code == 404:
                 return render_template("search.html", error="Établissement non trouvé.")
             else:
@@ -262,55 +270,28 @@ def bodacc():
         return redirect(url_for("login"))
 
     results = []
-
-    if request.method == "POST" and request.form.get("see_recent"):
-        results = scrape_recent_bodacc_annonces()
-        if not results:
-            flash("Aucune annonce récente trouvée.", "info")
-        return render_template("bodacc.html", results=results)
-
-    # Récupération plus claire du numéro
     if request.method == "POST":
         siret_or_siren = request.form.get("siret", "").strip()
     else:
-        siret_or_siren = request.args.get("siren", "").strip()
-
-    print("Request method:", request.method)
-    print("SIRET or SIREN:", siret_or_siren)
+        siret_or_siren = request.args.get("siret", "").strip() or request.args.get("siren", "").strip()
 
     if not siret_or_siren:
-        return render_template("bodacc.html", results=results)
+        return render_template("bodacc.html", error="Veuillez entrer un numéro SIREN ou SIRET.")
+
+    if not siret_or_siren:
+        return render_template("bodacc.html", error="Veuillez entrer un numéro SIREN ou SIRET.")
 
     if not siret_or_siren.isdigit() or len(siret_or_siren) not in (9, 14):
         flash("Numéro SIREN ou SIRET invalide.", "warning")
-        return render_template("bodacc.html", results=results)
+        return render_template("bodacc.html", error="Numéro SIREN ou SIRET invalide.")
 
-    # Si SIRET (14 chiffres), récupérer SIREN via API INSEE
+    # ✅ On extrait le SIREN directement des 9 premiers chiffres du SIRET
     if len(siret_or_siren) == 14:
-        token = get_access_token()
-        if not token:
-            flash("Erreur d'authentification à l'API INSEE.", "danger")
-            return render_template("bodacc.html", results=results)
-        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
-        url = API_SIRENE_URL.format(siret=siret_or_siren)
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                data = response.json().get("etablissement", {})
-                siren = data.get("siren", "")
-                if not siren:
-                    flash("Impossible de récupérer le SIREN à partir du SIRET.", "warning")
-                    return render_template("bodacc.html", results=results)
-            else:
-                flash(f"Erreur API INSEE : {response.status_code}", "danger")
-                return render_template("bodacc.html", results=results)
-        except requests.exceptions.RequestException as e:
-            flash(f"Erreur de connexion API INSEE : {e}", "danger")
-            return render_template("bodacc.html", results=results)
+        siren = siret_or_siren[:9]
     else:
         siren = siret_or_siren
 
-    # Recherche BODACC
+    # Recherche BODACC avec le SIREN
     url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=50&sort=dateparution"
     try:
         resp = requests.get(url)
@@ -342,6 +323,65 @@ def bodacc():
 
     return render_template("bodacc.html", results=results)
 
+
+
+from datetime import datetime, timedelta
+
+@app.route("/prospection")
+def prospection():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    token = get_access_token()
+    if not token:
+        flash("Erreur d'authentification à l'API INSEE.", "danger")
+        return redirect(url_for("login"))
+
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+    date_min = (datetime.today() - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    # Requête SIRENE : entreprises récentes avec NAF 6201Z
+    url = f"https://api.insee.fr/entreprises/sirene/V3/siret?q=periode(activitePrincipaleUniteLegale:6201Z AND dateCreationUniteLegale:[{date_min} TO *])&nombre=50"
+    try:
+        resp = requests.get(url, headers=headers)
+        resp.raise_for_status()
+        etablissements = resp.json().get("etablissements", [])
+    except Exception as e:
+        flash(f"Erreur API SIRENE : {e}", "danger")
+        return redirect(url_for("login"))
+
+    results = []
+    seen_siren = set()
+    for etab in etablissements:
+        siren = etab.get("siren")
+        if not siren or siren in seen_siren:
+            continue
+        seen_siren.add(siren)
+
+        # Chercher annonces BODACC
+        bodacc_url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=3&sort=dateparution"
+        try:
+            bodacc_resp = requests.get(bodacc_url)
+            bodacc_data = bodacc_resp.json().get("records", [])
+        except Exception:
+            bodacc_data = []
+
+        nom = etab.get("uniteLegale", {}).get("denominationUniteLegale", "")
+        results.append({
+            "siren": siren,
+            "nom": nom,
+            "date_creation": etab.get("dateCreationEtablissement", ""),
+            "bodacc": [
+                {
+                    "date": b.get("fields", {}).get("dateparution"),
+                    "type": b.get("fields", {}).get("typeavis_lib"),
+                    "pdf": b.get("fields", {}).get("urlpdf")
+                }
+                for b in bodacc_data
+            ]
+        })
+
+    return render_template("prospection.html", results=results)
 
 
 if __name__ == "__main__":
