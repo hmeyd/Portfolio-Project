@@ -91,26 +91,6 @@ def register():
         return redirect(url_for("search_company"))
     return render_template("register.html")
 
-@app.route("/login_phone", methods=["GET", "POST"])
-def login_phone():
-    if request.method == "POST":
-        country_code = request.form["country_code"]
-        phone = request.form["phone"]
-        password = request.form["password"]
-        full_phone = country_code + phone
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE phone = ?", (full_phone,))
-        user = c.fetchone()
-        conn.close()
-        if user and bcrypt.check_password_hash(user[0], password):
-            session["user"] = full_phone
-            return redirect(url_for("search_company"))
-        else:
-            flash("Numéro ou mot de passe incorrect.", "error")
-            return render_template("login_phone.html")
-    return render_template("login_phone.html")
-
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
@@ -237,33 +217,6 @@ def generate_pdf_url(annonce):
         return url_0
 
 
-
-def scrape_recent_bodacc_annonces(max_results=10):
-    url = "https://www.bodacc.fr/pages/annonces-commerciales/?sort=dateparution"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    results = []
-    try:
-        resp = requests.get(url, headers=headers)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "html.parser")
-        annonces = soup.find_all("article", class_="annonce")[:max_results]
-        for ann in annonces:
-            date = ann.find("time")
-            type_avis = ann.find("span", class_="typeavis")
-            tribunal = ann.find("p", class_="tribunal")
-            nom = ann.find("h3", class_="nomcommercant")
-            lien = ann.find("a", href=True, text=re.compile("Télécharger"))
-            results.append({
-                "date_parution": date.text.strip() if date else "",
-                "type_avis": type_avis.text.strip() if type_avis else "",
-                "tribunal": tribunal.text.strip() if tribunal else "",
-                "commercant": nom.text.strip() if nom else "",
-                "pdf_url": lien["href"] if lien else ""
-            })
-    except Exception as e:
-        flash(f"Erreur scraping annonces récentes : {e}", "danger")
-    return results
-
 @app.route("/bodacc", methods=["GET", "POST"])
 def bodacc():
     if "user" not in session:
@@ -327,61 +280,57 @@ def bodacc():
 
 from datetime import datetime, timedelta
 
-@app.route("/prospection")
+@app.route('/prospection', methods=['GET'])
 def prospection():
-    if "user" not in session:
-        return redirect(url_for("login"))
-
-    token = get_access_token()
-    if not token:
-        flash("Erreur d'authentification à l'API INSEE.", "danger")
-        return redirect(url_for("login"))
-
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
-    date_min = (datetime.today() - timedelta(days=30)).strftime("%Y-%m-%d")
-
-    # Requête SIRENE : entreprises récentes avec NAF 6201Z
-    url = f"https://api.insee.fr/entreprises/sirene/V3/siret?q=periode(activitePrincipaleUniteLegale:6201Z AND dateCreationUniteLegale:[{date_min} TO *])&nombre=50"
     try:
-        resp = requests.get(url, headers=headers)
+        # Étape 1 : obtenir le token OAuth
+        token_data = get_insee_token()
+        token = token_data.get("access_token")
+
+        if not token:
+            flash("Impossible d'obtenir un token INSEE", "error")
+            return redirect(url_for("bodacc"))
+
+        # Étape 2 : construire la requête vers l'API SIRENE (endpoint `/siren`)
+        url = "https://api.insee.fr/entreprises/sirene/V3/siren"
+
+        # Tu peux ajouter d'autres codes NAF ici si tu veux plus large
+        codes_naf = ["6201Z", "6202A", "6202B"]
+        naf_query = " OR ".join([f"activitePrincipaleUniteLegale:{code}" for code in codes_naf])
+
+        query = f"periode({naf_query})"
+        params = {
+            "q": query,
+            "nombre": 100  # Tu peux mettre jusqu'à 1000 max
+        }
+
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+
+        resp = requests.get(url, headers=headers, params=params)
         resp.raise_for_status()
-        etablissements = resp.json().get("etablissements", [])
-    except Exception as e:
-        flash(f"Erreur API SIRENE : {e}", "danger")
-        return redirect(url_for("login"))
+        data = resp.json()
 
-    results = []
-    seen_siren = set()
-    for etab in etablissements:
-        siren = etab.get("siren")
-        if not siren or siren in seen_siren:
-            continue
-        seen_siren.add(siren)
+        entreprises = data.get("etablissements", []) or data.get("unitesLegales", [])
 
-        # Chercher annonces BODACC
-        bodacc_url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=3&sort=dateparution"
-        try:
-            bodacc_resp = requests.get(bodacc_url)
-            bodacc_data = bodacc_resp.json().get("records", [])
-        except Exception:
-            bodacc_data = []
+        # Étape 3 (facultative) : extraire les infos utiles et les afficher
+        results = []
+        for ent in entreprises:
+            results.append({
+                "siren": ent.get("siren"),
+                "nom": ent.get("denominationUniteLegale") or ent.get("nomUniteLegale"),
+                "date_creation": ent.get("dateCreationUniteLegale"),
+                "naf": ent.get("activitePrincipaleUniteLegale")
+            })
 
-        nom = etab.get("uniteLegale", {}).get("denominationUniteLegale", "")
-        results.append({
-            "siren": siren,
-            "nom": nom,
-            "date_creation": etab.get("dateCreationEtablissement", ""),
-            "bodacc": [
-                {
-                    "date": b.get("fields", {}).get("dateparution"),
-                    "type": b.get("fields", {}).get("typeavis_lib"),
-                    "pdf": b.get("fields", {}).get("urlpdf")
-                }
-                for b in bodacc_data
-            ]
-        })
+        return render_template("prospection.html", entreprises=results)
 
-    return render_template("prospection.html", results=results)
+    except requests.RequestException as e:
+        flash(f"Erreur API SIRENE : {e}", "error")
+        return redirect(url_for("bodacc"))
+
+
 
 
 if __name__ == "__main__":
