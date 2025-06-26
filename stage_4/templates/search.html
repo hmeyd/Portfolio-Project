@@ -7,38 +7,47 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-    <div class="header-border"></div>
 
-    <header>
-        <h1>Rechercher une entreprise</h1>
-    </header>
+<nav class="navbar">
+  <div class="navbar-container">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+    <a href="{{ url_for('logout') }}" class="btn-logout">Se déconnecter</a>
+  </div>
+</nav>
 
+<div class="header-border"></div>
+
+<header>
+    <h1>Rechercher une entreprise</h1>
+</header>
+
+<div class="search-forms">
+    <div class="siret-search">
     <form method="POST" novalidate>
-        <a href="{{ url_for('logout') }}">Se déconnecter</a>
-        <label for="siret">Numéro SIRET (14 chiffres) :</label>
-        <input 
-            type="text" 
-            name="siret" 
-            id="siret" 
-            required 
-            maxlength="14" 
-            pattern="\d{14}" 
-            placeholder="Exemple : 12345678901234"
-            title="Veuillez saisir un numéro SIRET valide à 14 chiffres"
-        />
-        <button type="submit">Rechercher</button>
-    </form>
-
-    <!-- Animation des bulles -->
-    <div class="bubbles">
-        <span class="bubble"></span>
-        <span class="bubble"></span>
-        <span class="bubble"></span>
-        <span class="bubble"></span>
-        <span class="bubble"></span>
+    <label for="siret">Numéro SIRET (14 chiffres):</label>
+    <input 
+        type="text" 
+        name="siret" 
+        id="siret" 
+        required 
+        maxlength="14" 
+        pattern="\d{14}" 
+        placeholder="Ex: 12345678901234"
+        title="Saisir un numéro SIRET (14 chiffres)"
+    />
+    <button type="submit">Rechercher</button>
+</form>
     </div>
+</div>
 
-    <!-- Bordure dégradée en bas -->
-    <footer class="footer-border"></footer>
+<footer class="login-footer">
+    <a href="#">Conditions d'utilisation</a> |
+    <a href="#">Protection des données</a> |
+    <a href="#">Cookies</a> |
+    <a href="#">Mentions légales</a>
+</footer>
+
+<div class="footer-border"></div>
+
 </body>
 </html>

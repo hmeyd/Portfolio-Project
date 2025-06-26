@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer un compte</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="header-border"></div>
+
+  <div class="login-wrapper">
+    <div class="login-box">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Crédit Agricole" class="logo">
+      <h1>Plateforme Entreprise</h1>
+      <h2>Créer un compte</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-messages">
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <label for="email">Adresse e-mail</label>
+        <input type="email" name="email" required>
+
+        <label for="phone">Numéro de téléphone</label>
+        <input type="text" name="phone" required>
+
+        <label for="password">Mot de passe</label>
+        <input type="password" name="password" required>
+
+        <button type="submit" class="btn-login">Créer un compte</button>
+      </form>
+
+      <p class="register-link">Déjà un compte ? <a href="{{ url_for('login') }}">Se connecter</a></p>
+    </div>
+  </div>
+
+  <div class="footer-border"></div>
+</body>
+</html>

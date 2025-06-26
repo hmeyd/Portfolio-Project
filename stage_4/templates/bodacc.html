@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Annonces BODACC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Annonces BODACC</h1>
+
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+   
+
+    <!-- Affichage des résultats -->
+    {% if results %}
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Date de parution</th>
+                    <th>Type d'avis</th>
+                    <th>Tribunal</th>
+                    <th>Référence</th>
+                    <th>Description</th>
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for annonce in results %}
+                    <tr>
+                        <td>{{ annonce.date_parution }}</td>
+                        <td>{{ annonce.type_avis or annonce.type_document }}</td>
+                        <td>{{ annonce.tribunal or annonce.source }}</td>
+                        <td>{{ annonce.reference or annonce.numeroannonce or '' }}</td>
+                        <td>{{ annonce.description }}</td>
+                        <td>
+                            {% if annonce.pdf_url %}
+                                <a href="{{ annonce.pdf_url }}" target="_blank">Télécharger PDF</a>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif error %}
+        <p style="color:red;">{{ error }}</p>
+    {% else %}
+        <p>Aucune annonce à afficher.</p>
+    {% endif %}
+
+    <!-- Lien de déconnexion -->
+    <p><a href="{{ url_for('logout') }}">Se déconnecter</a></p>
+</body>
+</html>

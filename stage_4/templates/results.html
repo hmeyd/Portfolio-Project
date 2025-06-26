@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('logout') }}">Se déconnecter</a>
         <h1>Résultat de recherche</h1>
 
         {% if error %}
@@ -54,6 +53,19 @@
         {% else %}
             <p>Aucune donnée à afficher.</p>
         {% endif %}
+        <!-- Cadre BODACC juste après dirigeants, sans CSS -->
+    <h2>Consulter les annonces BODACC</h2>
+   <form method="GET" action="{{ url_for('bodacc') }}">
+    <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
+    <button type="submit">Voir les annonces BODACC</button>
+</form>
+<h2>Consulter les entreprises en Développement</h2>
+    <form method="GET" action="{{ url_for('prospection') }}">
+        <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
+        <button type="submit">Voir les entreprises en Développement</button>
+    </form>
+
     </div>
+    
 </body>
 </html>
