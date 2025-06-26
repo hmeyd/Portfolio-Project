@@ -1,18 +1,19 @@
 import sqlite3
 
-# Connexion ou création du fichier users.db
-conn = sqlite3.connect("users.db")
+# Change this to match the DB filename used in your app
+conn = sqlite3.connect('database.db')
 c = conn.cursor()
 
-# Création de la table users
+# Adjust the columns to match your app's insert statement
 c.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE,
-        phone TEXT UNIQUE,
-        password TEXT NOT NULL
-    )
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL
+)
 ''')
 
 conn.commit()
 conn.close()
+
+print("Users table created.")

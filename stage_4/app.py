@@ -57,29 +57,31 @@ def login():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
-        conn = sqlite3.connect("users.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT password FROM users WHERE email = ?", (email,))
-        user = cursor.fetchone()
-        conn.close()
-        if user and bcrypt.check_password_hash(user[0], password):
+
+        # Récupération des identifiants depuis le .env
+        admin_email = os.getenv("ADMIN_EMAIL")
+        admin_password = os.getenv("ADMIN_PASSWORD")
+
+        # Vérification simple (sans base de données)
+        if email == admin_email and password == admin_password:
             session["user"] = email
             return redirect(url_for("search_company"))
         else:
             return render_template("login.html", error="Identifiants incorrects.")
+    
     return render_template("login.html")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         email = request.form.get("email")
-        phone = request.form.get("phone")
         password = request.form.get("password")
         hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (email, phone, password) VALUES (?, ?, ?)", (email, phone, hashed_pw))
+            c.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, hashed_pw))
             conn.commit()
         except sqlite3.IntegrityError:
             conn.close()
