@@ -211,7 +211,8 @@ def generate_pdf_url(annonce):
                 if response2.status_code == 200:
                     return url_1
             # Sinon on retourne quand même la première url
-            return url_0
+                url_3 = f"{base_url}2/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
+            return url_3
     except requests.RequestException:
         # En cas d'erreur réseau on retourne quand même la première url
         return url_0
@@ -278,30 +279,25 @@ def bodacc():
 
 
 
-from datetime import datetime, timedelta
-
 @app.route('/prospection', methods=['GET'])
 def prospection():
     try:
-        # Étape 1 : obtenir le token OAuth
-        token_data = get_insee_token()
-        token = token_data.get("access_token")
-
+        token = get_access_token()
         if not token:
             flash("Impossible d'obtenir un token INSEE", "error")
-            return redirect(url_for("bodacc"))
+            return render_template("prospection.html", entreprises=[])
 
-        # Étape 2 : construire la requête vers l'API SIRENE (endpoint `/siren`)
-        url = "https://api.insee.fr/entreprises/sirene/V3/siren"
+        url = "https://api.insee.fr/entreprises/sirene/V3.11/unites-legales"
 
-        # Tu peux ajouter d'autres codes NAF ici si tu veux plus large
+
+
         codes_naf = ["6201Z", "6202A", "6202B"]
-        naf_query = " OR ".join([f"activitePrincipaleUniteLegale:{code}" for code in codes_naf])
+        naf_query = " OR ".join([f'activitePrincipaleUniteLegale:{code}' for code in codes_naf])
 
-        query = f"periode({naf_query})"
+        query = f"({naf_query})"
         params = {
             "q": query,
-            "nombre": 100  # Tu peux mettre jusqu'à 1000 max
+            "nombre": 50
         }
 
         headers = {
@@ -312,24 +308,21 @@ def prospection():
         resp.raise_for_status()
         data = resp.json()
 
-        entreprises = data.get("etablissements", []) or data.get("unitesLegales", [])
+        entreprises = data.get("unitesLegales", [])
 
-        # Étape 3 (facultative) : extraire les infos utiles et les afficher
         results = []
         for ent in entreprises:
             results.append({
                 "siren": ent.get("siren"),
                 "nom": ent.get("denominationUniteLegale") or ent.get("nomUniteLegale"),
-                "date_creation": ent.get("dateCreationUniteLegale"),
-                "naf": ent.get("activitePrincipaleUniteLegale")
+                "ville": ent.get("l1Normalisee") or "N/A"
             })
 
         return render_template("prospection.html", entreprises=results)
 
     except requests.RequestException as e:
         flash(f"Erreur API SIRENE : {e}", "error")
-        return redirect(url_for("bodacc"))
-
+        return render_template("prospection.html", entreprises=[])
 
 
 

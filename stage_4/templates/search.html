@@ -38,6 +38,11 @@
     <button type="submit">Rechercher</button>
 </form>
     </div>
+      <form method="GET" action="{{ url_for('prospection') }}">
+        <input type="hidden" name="siren" value="{{ data.siret[:9] if data and data.siret }}">
+        <button type="submit">Voir les entreprises en Développement</button>
+    </form>
+
 </div>
 
 <footer class="login-footer">

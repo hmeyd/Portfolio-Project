@@ -59,11 +59,6 @@
     <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
     <button type="submit">Voir les annonces BODACC</button>
 </form>
-<h2>Consulter les entreprises en Développement</h2>
-    <form method="GET" action="{{ url_for('prospection') }}">
-        <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
-        <button type="submit">Voir les entreprises en Développement</button>
-    </form>
 
     </div>
     

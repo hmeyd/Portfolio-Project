@@ -2,51 +2,43 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Prospection - Entreprises Web</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Prospection</title>
 </head>
 <body>
-    <h1>Entreprises récentes - Développement Web</h1>
+    <h1>Entreprises du secteur Développement</h1>
 
-    {% if results %}
-        <table border="1" cellpadding="5" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>SIREN</th>
-                    <th>Date de création</th>
-                    <th>Annonces BODACC</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in results %}
-                    <tr>
-                        <td>{{ r.nom or "Inconnu" }}</td>
-                        <td>{{ r.siren }}</td>
-                        <td>{{ r.date_creation }}</td>
-                        <td>
-                            {% if r.bodacc %}
-                                <ul>
-                                    {% for b in r.bodacc %}
-                                        <li>{{ b.date }} - {{ b.type }}
-                                            {% if b.pdf %}
-                                                - <a href="{{ b.pdf }}" target="_blank">PDF</a>
-                                            {% endif %}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                Aucune
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li><strong>{{ category }}:</strong> {{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if entreprises %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>SIREN</th>
+                <th>Nom</th>
+                <th>Ville</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ent in entreprises %}
+            <tr>
+                <td>{{ ent.siren }}</td>
+                <td>{{ ent.nom }}</td>
+                <td>{{ ent.ville }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
-        <p>Aucune entreprise trouvée.</p>
+    <p>Aucune entreprise trouvée.</p>
     {% endif %}
-
-    <p><a href="{{ url_for('logout') }}">Se déconnecter</a></p>
 </body>
+
 </html>
