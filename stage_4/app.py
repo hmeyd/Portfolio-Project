@@ -223,10 +223,13 @@ from flask import jsonify
 @app.route("/bodacc", methods=["GET", "POST"])
 def bodacc():
     if "user" not in session:
+        if request.accept_mimetypes.accept_json:
+            return jsonify({"error": "Non authentifié."}), 401
         return redirect(url_for("login"))
 
     results = []
 
+    # --- Récupération du SIRET ou SIREN ---
     if request.method == "POST":
         if request.is_json:
             siret_or_siren = request.get_json().get("siret", "").strip()
@@ -235,21 +238,24 @@ def bodacc():
     else:
         siret_or_siren = request.args.get("siret", "").strip() or request.args.get("siren", "").strip()
 
+    # --- Validation ---
     if not siret_or_siren:
-        if request.is_json:
-            return jsonify({"error": "Veuillez entrer un numéro SIREN ou SIRET."}), 400
-        return render_template("bodacc.html", error="Veuillez entrer un numéro SIREN ou SIRET.")
+        msg = "Veuillez entrer un numéro SIREN ou SIRET."
+        if request.accept_mimetypes.accept_json:
+            return jsonify({"error": msg}), 400
+        return render_template("bodacc.html", error=msg)
 
     if not siret_or_siren.isdigit() or len(siret_or_siren) not in (9, 14):
         msg = "Numéro SIREN ou SIRET invalide."
-        if request.is_json:
+        if request.accept_mimetypes.accept_json:
             return jsonify({"error": msg}), 400
-        flash(msg, "warning")
         return render_template("bodacc.html", error=msg)
 
+    # --- Traitement API BODACC ---
     siren = siret_or_siren[:9] if len(siret_or_siren) == 14 else siret_or_siren
 
     url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=50&sort=dateparution"
+
     try:
         resp = requests.get(url)
         resp.raise_for_status()
@@ -273,17 +279,21 @@ def bodacc():
                 "description": description or "",
                 "pdf_url": fields.get("urlpdf") or generate_pdf_url(fields)
             })
-        if not results:
+
+        if not results and not request.accept_mimetypes.accept_json:
             flash("Aucune annonce trouvée pour ce SIREN.", "info")
+
     except requests.exceptions.RequestException as e:
-        if request.is_json:
-            return jsonify({"error": f"Erreur récupération annonces BODACC : {e}"}), 500
-        flash(f"Erreur récupération annonces BODACC : {e}", "danger")
+        err_msg = f"Erreur récupération annonces BODACC : {e}"
+        if request.accept_mimetypes.accept_json:
+            return jsonify({"error": err_msg}), 500
+        flash(err_msg, "danger")
 
-    if request.is_json:
+    # --- Retour JSON si API JS ---
+    if request.accept_mimetypes.accept_json:
         return jsonify({"results": results})
-    return render_template("bodacc.html", results=results)
 
+    return render_template("bodacc.html", results=results)
 
 
 @app.route('/prospection', methods=['GET'])

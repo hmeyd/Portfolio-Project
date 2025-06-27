@@ -6,68 +6,12 @@
   <title>Annonces BODACC</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;900&display=swap" rel="stylesheet" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f8fbfd;
-      color: #1f3e46;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background-color: #2a6f97;
-      color: white;
-      padding: 20px 5%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    header h1 {
-      font-size: 1.8rem;
-    }
-    header a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 20px auto;
-      justify-content: center;
-      max-width: 900px;
-      padding: 0 5%;
-    }
-    .button-row button {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 16px;
-      background: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: background-color 0.3s;
-    }
-    .button-row button:hover {
-      background: #f5f5f5;
-    }
-    main {
-      flex: 1;
-      padding: 20px 5%;
-      max-width: 900px;
-      margin: 0 auto 40px;
+      background: #F1F5F9;
+      margin: 0;
+      padding: 24px;
+      color: #1E293B;
     }
     .result-card {
       background: white;
@@ -75,12 +19,15 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.06);
       padding: 24px;
       overflow-x: auto;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     h2 {
       color: #2a6f97;
       margin-bottom: 12px;
       font-size: 1.4rem;
       font-weight: 900;
+      text-align: center;
     }
     table {
       width: 100%;
@@ -108,28 +55,7 @@
     a:hover {
       text-decoration: underline;
     }
-    .error {
-      color: red;
-      font-weight: 700;
-      text-align: center;
-      margin-top: 20px;
-    }
-    footer {
-      background: #2a6f97;
-      color: white;
-      text-align: center;
-      padding: 16px;
-      font-size: 0.9rem;
-      margin-top: auto;
-    }
     @media (max-width: 600px) {
-      header h1 {
-        font-size: 1.4rem;
-      }
-      .button-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
       table, thead, tbody, th, td, tr {
         display: block;
       }
@@ -165,63 +91,68 @@
     }
   </style>
 </head>
-
 <body>
-  <header>
-    <h1>Annonces BODACC</h1>
-    <a href="{{ url_for('logout') }}">Se déconnecter</a>
-  </header>
-
-  <div class="button-row">
-    <button onclick="window.history.back()">
-      ⬅ Retour
-    </button>
+  <div class="result-card">
+    <h2>Annonces BODACC</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date de parution</th>
+          <th>Type d'avis</th>
+          <th>Tribunal</th>
+          <th>Référence</th>
+          <th>Description</th>
+          <th>PDF</th>
+        </tr>
+      </thead>
+      <tbody id="bodacc-table-body">
+        <!-- Les lignes seront insérées par JavaScript -->
+      </tbody>
+    </table>
   </div>
 
-  <main>
-    {% if results %}
-      <div class="result-card">
-        <h2>Liste des annonces</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date de parution</th>
-              <th>Type d'avis</th>
-              <th>Tribunal</th>
-              <th>Référence</th>
-              <th>Description</th>
-              <th>PDF</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for annonce in results %}
-              <tr>
-                <td data-label="Date de parution">{{ annonce.date_parution }}</td>
-                <td data-label="Type d'avis">{{ annonce.type_avis or annonce.type_document }}</td>
-                <td data-label="Tribunal">{{ annonce.tribunal or annonce.source }}</td>
-                <td data-label="Référence">{{ annonce.reference or annonce.numeroannonce or '' }}</td>
-                <td data-label="Description">{{ annonce.description }}</td>
-                <td data-label="PDF">
-                  {% if annonce.pdf_url %}
-                    <a href="{{ annonce.pdf_url }}" target="_blank" rel="noopener">Voir PDF</a>
-                  {% else %}
-                    N/A
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% elif error %}
-      <p class="error">{{ error }}</p>
-    {% else %}
-      <p>Aucune annonce à afficher.</p>
-    {% endif %}
-  </main>
+  <script>
+    async function loadBodacc(siret) {
+      try {
+        const response = await fetch(`/bodacc?siret=${siret}`, { headers: { 'Accept': 'application/json' } });
+        const data = await response.json();
 
-  <footer>
-    &copy; 2025 Registre Entreprise. Tous droits réservés.
-  </footer>
+        if (data.error) {
+          document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">${data.error}</p>`;
+          return;
+        }
+        if (!data.results.length) {
+          document.body.innerHTML = `<p style="text-align:center;">Aucune annonce BODACC trouvée pour ce SIRET.</p>`;
+          return;
+        }
+
+        const tbody = document.getElementById('bodacc-table-body');
+        data.results.forEach(r => {
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td data-label="Date de parution">${r.date_parution || ''}</td>
+            <td data-label="Type d'avis">${r.type_avis || r.type_document || ''}</td>
+            <td data-label="Tribunal">${r.tribunal || r.source || ''}</td>
+            <td data-label="Référence">${r.reference || r.numeroannonce || ''}</td>
+            <td data-label="Description">${r.description || ''}</td>
+            <td data-label="PDF">${r.pdf_url ? `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer">Voir PDF</a>` : 'N/A'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">Erreur lors du chargement des annonces BODACC.</p>`;
+        console.error(err);
+      }
+    }
+
+    // Remplace par le SIRET que tu veux tester ici
+    const siret = new URLSearchParams(window.location.search).get('siret');
+    if (siret) {
+      loadBodacc(siret);
+    } else {
+      document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">SIRET non fourni.</p>`;
+    }
+  </script>
 </body>
 </html>
