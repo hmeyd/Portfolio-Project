@@ -1,49 +1,22 @@
-import os
 import requests
-import base64
-from dotenv import load_dotenv
 
-load_dotenv()
-
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-
-def get_token():
-    credentials = f"{CLIENT_ID}:{CLIENT_SECRET}"
-    encoded_credentials = base64.b64encode(credentials.encode()).decode()
-    headers = {
-        "Authorization": f"Basic {encoded_credentials}",
-        "Content-Type": "application/x-www-form-urlencoded"
+def test_api():
+    token = "74299f23-813d-3dfe-924e-5b10813703b9"  # Remplace par un token valide
+    url = "https://api.insee.fr/entreprises/sirene/V3.11/unitesLegales"
+    codes_naf = ["6201Z", "6202A", "6202B"]
+    naf_query = " OR ".join([f'activitePrincipaleUniteLegale:{code}' for code in codes_naf])
+    query = f"({naf_query})"
+    params = {
+        "q": query,
+        "nombre": 5
     }
-    data = {"grant_type": "client_credentials"}
-
-    response = requests.post("https://api.insee.fr/token", headers=headers, data=data)
-    if response.status_code == 200:
-        token = response.json().get("access_token")
-        print("✅ Token obtenu :", token)
-        return token
-    else:
-        print("❌ Erreur récupération token:", response.status_code, response.text)
-        return None
-
-def fetch_etablissement(siret):
-    token = get_token()
-    if not token:
-        print("Impossible d’obtenir le token, arrêt du test.")
-        return
-
     headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json"
+        "Authorization": f"Bearer {token}"
     }
-
-    url = f"https://api.insee.fr/entreprises/sirene/V3/siret/{siret}"
-    print("🔎 URL appelée :", url)
-
-    response = requests.get(url, headers=headers)
-    print("📦 Status code :", response.status_code)
-    print("📝 Réponse brute :", response.text)
+    response = requests.get(url, headers=headers, params=params)
+    print("URL finale :", response.url)
+    print("Status code :", response.status_code)
+    print("Response text :", response.text)
 
 if __name__ == "__main__":
-    siret_test = "73282932000074"  # <-- numéro SIRET valide à tester
-    fetch_etablissement(siret_test)
+    test_api()

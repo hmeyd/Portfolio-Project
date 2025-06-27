@@ -1,58 +1,198 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Recherche Entreprise</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recherche Entreprise</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+      background: #000;
+    }
+
+    /* Header */
+    .top-nav {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: flex-end;
+      z-index: 10;
+    }
+    .connect-button {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 18px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+    .connect-button:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Hero avec vidéo */
+    .hero-search {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .video-wrapper {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .background-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 20px;
+      max-width: 700px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      color: #fff;
+    }
+    .hero-content h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .hero-content p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .search-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-form input {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      width: 60%;
+      max-width: 400px;
+      font-size: 1rem;
+    }
+    .search-form button {
+      padding: 14px;
+      background: #fff;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .search-form button:hover {
+      background: #ddd;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: #111;
+      color: #ccc;
+    }
+    .footer .social-links {
+      margin: 10px 0;
+    }
+    .footer .social-links a {
+      margin: 0 10px;
+      font-size: 1.4rem;
+      color: #ccc;
+      transition: color 0.3s;
+    }
+    .footer .social-links a:hover {
+      color: #fff;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 1.6rem;
+      }
+      .hero-content p {
+        font-size: 1rem;
+      }
+      .search-form {
+        flex-direction: column;
+      }
+      .search-form input,
+      .search-form button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="navbar-container">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
-    <a href="{{ url_for('logout') }}" class="btn-logout">Se déconnecter</a>
-  </div>
-</nav>
+  <!-- Barre de navigation -->
+  <header class="top-nav">
+    <a href="/login" class="connect-button">
+      <i class="fas fa-user-circle"></i>
+      <span>Connexion</span>
+    </a>
+  </header>
 
-<div class="header-border"></div>
-
-<header>
-    <h1>Rechercher une entreprise</h1>
-</header>
-
-<div class="search-forms">
-    <div class="siret-search">
-    <form method="POST" novalidate>
-    <label for="siret">Numéro SIRET (14 chiffres):</label>
-    <input 
-        type="text" 
-        name="siret" 
-        id="siret" 
-        required 
-        maxlength="14" 
-        pattern="\d{14}" 
-        placeholder="Ex: 12345678901234"
-        title="Saisir un numéro SIRET (14 chiffres)"
-    />
-    <button type="submit">Rechercher</button>
-</form>
+  <!-- Section principale -->
+  <section class="hero-search">
+    <div class="video-wrapper">
+      <video class="background-video" autoplay muted loop playsinline>
+        <source src="{{ url_for('static', filename='video.search.mp4') }}" type="video/mp4">
+        Votre navigateur ne supporte pas les vidéos HTML5.
+      </video>
     </div>
-      <form method="GET" action="{{ url_for('prospection') }}">
-        <input type="hidden" name="siren" value="{{ data.siret[:9] if data and data.siret }}">
-        <button type="submit">Voir les entreprises en Développement</button>
-    </form>
+    <div class="hero-content">
+      <h1>Recherchez par numéro SIRET</h1>
+      <p>Entrez un numéro SIRET pour accéder aux données de l'entreprise concernée.</p>
+      <form method="POST" class="search-form">
+        <input type="text" name="siret" placeholder="Numéro SIRET" required />
+        <button type="submit"><i class="fas fa-search"></i></button>
+      </form>
+     
+      </div>
+    </div>
+  </section>
 
-</div>
-
-<footer class="login-footer">
-    <a href="#">Conditions d'utilisation</a> |
-    <a href="#">Protection des données</a> |
-    <a href="#">Cookies</a> |
-    <a href="#">Mentions légales</a>
-</footer>
-
-<div class="footer-border"></div>
+  <!-- Pied de page -->
+  <footer class="footer">
+    <p>Suivez-nous</p>
+    <div class="social-links">
+      <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+      <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+      <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
+    </div>
+    <p>&copy; 2025 Registre Entreprise</p>
+  </footer>
 
 </body>
 </html>

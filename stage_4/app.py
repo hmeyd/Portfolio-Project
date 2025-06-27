@@ -175,6 +175,7 @@ def search_company():
 
 
 
+
 def generate_pdf_url(annonce):
     publicationavis = annonce.get("publicationavis", "A")
     parution = annonce.get("parution", "")
@@ -216,7 +217,8 @@ def generate_pdf_url(annonce):
     except requests.RequestException:
         # En cas d'erreur réseau on retourne quand même la première url
         return url_0
-
+import json
+from flask import jsonify
 
 @app.route("/bodacc", methods=["GET", "POST"])
 def bodacc():
@@ -224,28 +226,29 @@ def bodacc():
         return redirect(url_for("login"))
 
     results = []
+
     if request.method == "POST":
-        siret_or_siren = request.form.get("siret", "").strip()
+        if request.is_json:
+            siret_or_siren = request.get_json().get("siret", "").strip()
+        else:
+            siret_or_siren = request.form.get("siret", "").strip()
     else:
         siret_or_siren = request.args.get("siret", "").strip() or request.args.get("siren", "").strip()
 
     if not siret_or_siren:
-        return render_template("bodacc.html", error="Veuillez entrer un numéro SIREN ou SIRET.")
-
-    if not siret_or_siren:
+        if request.is_json:
+            return jsonify({"error": "Veuillez entrer un numéro SIREN ou SIRET."}), 400
         return render_template("bodacc.html", error="Veuillez entrer un numéro SIREN ou SIRET.")
 
     if not siret_or_siren.isdigit() or len(siret_or_siren) not in (9, 14):
-        flash("Numéro SIREN ou SIRET invalide.", "warning")
-        return render_template("bodacc.html", error="Numéro SIREN ou SIRET invalide.")
+        msg = "Numéro SIREN ou SIRET invalide."
+        if request.is_json:
+            return jsonify({"error": msg}), 400
+        flash(msg, "warning")
+        return render_template("bodacc.html", error=msg)
 
-    # ✅ On extrait le SIREN directement des 9 premiers chiffres du SIRET
-    if len(siret_or_siren) == 14:
-        siren = siret_or_siren[:9]
-    else:
-        siren = siret_or_siren
+    siren = siret_or_siren[:9] if len(siret_or_siren) == 14 else siret_or_siren
 
-    # Recherche BODACC avec le SIREN
     url = f"https://bodacc-datadila.opendatasoft.com/api/records/1.0/search/?dataset=annonces-commerciales&q={siren}&rows=50&sort=dateparution"
     try:
         resp = requests.get(url)
@@ -273,8 +276,12 @@ def bodacc():
         if not results:
             flash("Aucune annonce trouvée pour ce SIREN.", "info")
     except requests.exceptions.RequestException as e:
+        if request.is_json:
+            return jsonify({"error": f"Erreur récupération annonces BODACC : {e}"}), 500
         flash(f"Erreur récupération annonces BODACC : {e}", "danger")
 
+    if request.is_json:
+        return jsonify({"results": results})
     return render_template("bodacc.html", results=results)
 
 

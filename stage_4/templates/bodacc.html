@@ -1,65 +1,227 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <title>Annonces BODACC</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Annonces BODACC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fbfd;
+      color: #1f3e46;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #2a6f97;
+      color: white;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-size: 1.8rem;
+    }
+    header a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px auto;
+      justify-content: center;
+      max-width: 900px;
+      padding: 0 5%;
+    }
+    .button-row button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    .button-row button:hover {
+      background: #f5f5f5;
+    }
+    main {
+      flex: 1;
+      padding: 20px 5%;
+      max-width: 900px;
+      margin: 0 auto 40px;
+    }
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+      padding: 24px;
+      overflow-x: auto;
+    }
+    h2 {
+      color: #2a6f97;
+      margin-bottom: 12px;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-weight: 300;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+    th {
+      background-color: #e0f0fb;
+      font-weight: 600;
+      color: #2a6f97;
+    }
+    a {
+      color: #2a6f97;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: red;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 20px;
+    }
+    footer {
+      background: #2a6f97;
+      color: white;
+      text-align: center;
+      padding: 16px;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+      .button-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      tr {
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+      }
+      td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      td:before {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #2a6f97;
+        content: attr(data-label);
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <header>
     <h1>Annonces BODACC</h1>
+    <a href="{{ url_for('logout') }}">Se déconnecter</a>
+  </header>
 
-    <!-- Affichage des messages flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-          {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+  <div class="button-row">
+    <button onclick="window.history.back()">
+      ⬅ Retour
+    </button>
+  </div>
 
-   
-
-    <!-- Affichage des résultats -->
+  <main>
     {% if results %}
-        <table border="1" cellpadding="5" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Date de parution</th>
-                    <th>Type d'avis</th>
-                    <th>Tribunal</th>
-                    <th>Référence</th>
-                    <th>Description</th>
-                    <th>PDF</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for annonce in results %}
-                    <tr>
-                        <td>{{ annonce.date_parution }}</td>
-                        <td>{{ annonce.type_avis or annonce.type_document }}</td>
-                        <td>{{ annonce.tribunal or annonce.source }}</td>
-                        <td>{{ annonce.reference or annonce.numeroannonce or '' }}</td>
-                        <td>{{ annonce.description }}</td>
-                        <td>
-                            {% if annonce.pdf_url %}
-                                <a href="{{ annonce.pdf_url }}" target="_blank">Voir PDF</a>
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+      <div class="result-card">
+        <h2>Liste des annonces</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date de parution</th>
+              <th>Type d'avis</th>
+              <th>Tribunal</th>
+              <th>Référence</th>
+              <th>Description</th>
+              <th>PDF</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for annonce in results %}
+              <tr>
+                <td data-label="Date de parution">{{ annonce.date_parution }}</td>
+                <td data-label="Type d'avis">{{ annonce.type_avis or annonce.type_document }}</td>
+                <td data-label="Tribunal">{{ annonce.tribunal or annonce.source }}</td>
+                <td data-label="Référence">{{ annonce.reference or annonce.numeroannonce or '' }}</td>
+                <td data-label="Description">{{ annonce.description }}</td>
+                <td data-label="PDF">
+                  {% if annonce.pdf_url %}
+                    <a href="{{ annonce.pdf_url }}" target="_blank" rel="noopener">Voir PDF</a>
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
         </table>
+      </div>
     {% elif error %}
-        <p style="color:red;">{{ error }}</p>
+      <p class="error">{{ error }}</p>
     {% else %}
-        <p>Aucune annonce à afficher.</p>
+      <p>Aucune annonce à afficher.</p>
     {% endif %}
+  </main>
 
-    <!-- Lien de déconnexion -->
-    <p><a href="{{ url_for('logout') }}">Se déconnecter</a></p>
+  <footer>
+    &copy; 2025 Registre Entreprise. Tous droits réservés.
+  </footer>
 </body>
 </html>

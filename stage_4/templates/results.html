@@ -1,66 +1,286 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Résultat de recherche</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Résultat de recherche</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fbfd;
+      color: #1f3e46;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #2a6f97;
+      color: white;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px auto;
+      justify-content: center;
+      max-width: 900px;
+      padding: 0 5%;
+    }
+
+    .button-row button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .button-row button:hover {
+      background: #f5f5f5;
+    }
+
+    .button-row svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px 5%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+      padding: 24px;
+    }
+
+    h2 {
+      color: #2a6f97;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 12px;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+
+    iframe {
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 0;
+    }
+
+    footer {
+      background: #2a6f97;
+      color: white;
+      text-align: center;
+      padding: 16px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      .result-card {
+        padding: 16px;
+      }
+
+      h2 {
+        font-size: 1rem;
+      }
+
+      .button-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Résultat de recherche</h1>
+  <header>
+    <h1>Résultat de recherche</h1>
+    <a href="{{ url_for('logout') }}">Se déconnecter</a>
+  </header>
 
-        {% if error %}
-            <p style="color:red;">{{ error }}</p>
+  <div class="button-row">
+    <button onclick="window.history.back()">
+      <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 19l-7-7 7-7"></path>
+        <path d="M19 12H5"></path>
+      </svg>
+      Retour
+    </button>
 
-        {% elif data %}
-            <p><strong>SIRET :</strong> {{ data.siret }}</p>
-            <p><strong>Nom :</strong> {{ data.uniteLegale.denominationUniteLegale or 'N/A' }}</p>
-            <p><strong>Adresse :</strong>
-                {% if data.adresseEtablissement %}
-                    {{ data.adresseEtablissement.numeroVoieEtablissement | default('') }}
-                    {{ data.adresseEtablissement.typeVoieEtablissement | default('') }}
-                    {{ data.adresseEtablissement.libelleVoieEtablissement | default('') }},
-                    {{ data.adresseEtablissement.codePostalEtablissement | default('') }}
-                    {{ data.adresseEtablissement.libelleCommuneEtablissement | default('') }}
-                {% else %}
-                    N/A
-                {% endif %}
-            </p>
-            <p><strong>Date de création :</strong> {{ data.dateCreationEtablissement or 'N/A' }}</p>
-            <p><strong>Activité principale :</strong> {{ data.uniteLegale.activitePrincipaleUniteLegale or 'N/A' }}</p>
-            <p><strong>Effectif :</strong> {{ data.uniteLegale.trancheEffectifsUniteLegale or 'N/A' }}</p>
-            <p><strong>Statut administratif :</strong> {{ data.uniteLegale.etatAdministratifUniteLegale or 'N/A' }}</p>
+    <button onclick="openBodaccSearch('{{ data.siret }}')">
+      <svg stroke="#60A5FA" fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path>
+        <path d="M18 14h-8"></path>
+        <path d="M15 18h-5"></path>
+        <path d="M10 6h8v4h-8V6Z"></path>
+      </svg>
+      Annonces et publications
+    </button>
 
-            <!-- Affichage des dirigeants -->
-            <h2>Dirigeants</h2>
-            {% if dirigeants %}
-                <ul>
-                    {% for d in dirigeants %}
-                        <li>
-                            <strong>Nom :</strong> {{ d.nom or 'N/A' }},
-                            <strong>Prénom :</strong> {{ d.prenom or 'N/A' }}<br>
-                            <strong>Fonction :</strong> {{ d.fonction or 'N/A' }}<br>
-                            <strong>Date de nomination :</strong> {{ d.date_nomination or 'N/A' }}<br>
-                            <strong>Statut administratif :</strong> {{ d.statut_administratif or 'N/A' }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>Aucun dirigeant trouvé.</p>
-            {% endif %}
+    <button disabled>
+      <svg stroke="#FACC14" fill="none" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path>
+        <path d="M15 3v6h6"></path>
+      </svg>
+      Notes
+    </button>
 
+    <button disabled>
+      <svg stroke="#FB923C" fill="#FB923C" stroke-width="2" viewBox="0 0 24 24">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+      Avis
+    </button>
+  </div>
+
+  <main>
+    {% if error %}
+      <p class="error">{{ error }}</p>
+
+    {% elif data %}
+      <div class="result-card">
+        <p><strong>SIRET :</strong> {{ data.siret }}</p>
+        <p><strong>Nom :</strong> {{ data.uniteLegale.denominationUniteLegale or 'N/A' }}</p>
+
+        <p><strong>Adresse :</strong>
+          {% if data.adresseEtablissement %}
+            {% set adresse_parts = [
+              data.adresseEtablissement.numeroVoieEtablissement | default(''),
+              data.adresseEtablissement.typeVoieEtablissement | default(''),
+              data.adresseEtablissement.libelleVoieEtablissement | default(''),
+              data.adresseEtablissement.codePostalEtablissement | default(''),
+              data.adresseEtablissement.libelleCommuneEtablissement | default('')
+            ] %}
+            {% set adresse = adresse_parts | join(' ') %}
+            {{ adresse }}
+            <br><br>
+            <iframe
+              width="100%"
+              height="300"
+              frameborder="0"
+              title="Carte de localisation"
+              src="https://www.google.com/maps?q={{ adresse | urlencode }}&output=embed"
+              allowfullscreen
+            ></iframe>
+          {% else %}
+            N/A
+          {% endif %}
+        </p>
+
+        <p><strong>Date de création :</strong> {{ data.dateCreationEtablissement or 'N/A' }}</p>
+        <p><strong>Activité principale :</strong> {{ data.uniteLegale.activitePrincipaleUniteLegale or 'N/A' }}</p>
+        <p><strong>Effectif :</strong> {{ data.uniteLegale.trancheEffectifsUniteLegale or 'N/A' }}</p>
+        <p><strong>Statut administratif :</strong> {{ data.uniteLegale.etatAdministratifUniteLegale or 'N/A' }}</p>
+      </div>
+
+      <div class="result-card">
+        <h2>Dirigeants</h2>
+        {% if dirigeants %}
+          <ul>
+            {% for d in dirigeants %}
+              <li>
+                <strong>Nom :</strong> {{ d.nom or 'N/A' }}<br>
+                <strong>Prénom :</strong> {{ d.prenom or 'N/A' }}<br>
+                <strong>Fonction :</strong> {{ d.fonction or 'N/A' }}<br>
+                <strong>Date de nomination :</strong> {{ d.date_nomination or 'N/A' }}<br>
+                <strong>Statut administratif :</strong> {{ d.statut_administratif or 'N/A' }}
+              </li>
+            {% endfor %}
+          </ul>
         {% else %}
-            <p>Aucune donnée à afficher.</p>
+          <p>Aucun dirigeant trouvé.</p>
         {% endif %}
-        <!-- Cadre BODACC juste après dirigeants, sans CSS -->
-    <h2>Consulter les annonces BODACC</h2>
-   <form method="GET" action="{{ url_for('bodacc') }}">
-    <input type="hidden" name="siret" value="{{ data.siret[:9] if data and data.siret }}">
-    <button type="submit">Voir les annonces BODACC</button>
-</form>
+      </div>
 
-    </div>
-    
+    {% else %}
+      <p>Aucune donnée à afficher.</p>
+    {% endif %}
+  </main>
+
+  <footer>
+    &copy; 2025 Registre Entreprise. Tous droits réservés.
+  </footer>
+
+  <script>
+  function openBodaccSearch(siret) {
+    if (siret) {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "/bodacc";
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "siret";
+      input.value = siret;
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      alert("Numéro SIRET introuvable !");
+    }
+  }
+</script>
+
 </body>
 </html>
