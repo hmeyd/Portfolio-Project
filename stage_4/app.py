@@ -73,6 +73,20 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        name = request.form.get("name")
+        if not name or not re.match(r"^[a-zA-Z\s]+$", name):
+            flash("Le nom doit contenir uniquement des lettres et des espaces.", "error")
+            return render_template("register.html")
+        if len(name) < 2 or len(name) > 50:
+            flash("Le nom doit contenir entre 2 et 50 caractères.", "error")
+            return render_template("register.html")
+        lastname = request.form.get("lastname")
+        if not lastname or not re.match(r"^[a-zA-Z\s]+$", lastname):
+            flash("Le prénom doit contenir uniquement des lettres et des espaces.", "error")
+            return render_template("register.html")
+        if len(lastname) < 2 or len(lastname) > 50:
+            flash("Le prénom doit contenir entre 2 et 50 caractères.", "error")
+            return render_template("register.html")
         email = request.form.get("email")
         phone = request.form.get("phone")
         password = request.form.get("password")
@@ -114,6 +128,8 @@ def forgot_password():
         except Exception as e:
             return render_template("forgot_password.html", error="Erreur lors de l'envoi du mail.")
     return render_template("forgot_password.html")
+
+
 
 @app.route("/reset-password", methods=["GET", "POST"])
 def reset_password():

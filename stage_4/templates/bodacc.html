@@ -13,146 +13,136 @@
       padding: 24px;
       color: #1E293B;
     }
+
     .result-card {
       background: white;
       border-radius: 12px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.06);
       padding: 24px;
-      overflow-x: auto;
       max-width: 1200px;
       margin: 0 auto;
     }
+
     h2 {
       color: #2a6f97;
-      margin-bottom: 12px;
-      font-size: 1.4rem;
-      font-weight: 900;
+      margin-bottom: 20px;
       text-align: center;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      font-weight: 300;
       font-size: 0.95rem;
-      color: #333;
     }
+
     th, td {
       padding: 12px 10px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #ccc;
       vertical-align: top;
+      text-align: left;
     }
+
     th {
       background-color: #e0f0fb;
-      font-weight: 600;
       color: #2a6f97;
     }
-    a {
-      color: #2a6f97;
+
+    .pdf-button {
+      background-color: #2a6f97;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      display: inline-block;
+      font-size: 0.85rem;
       text-decoration: none;
-      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    a:hover {
-      text-decoration: underline;
-    }
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      tr {
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-      }
-      td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-      }
-      td:before {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        font-weight: 600;
-        color: #2a6f97;
-        content: attr(data-label);
-      }
+
+    .pdf-button:hover {
+      background-color: #1b4f6a;
+      transform: scale(1.03);
     }
   </style>
 </head>
 <body>
-  <div class="result-card">
-    <h2>Annonces BODACC</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date de parution</th>
-          <th>Type d'avis</th>
-          <th>Tribunal</th>
-          <th>Référence</th>
-          <th>Description</th>
-          <th>PDF</th>
-        </tr>
-      </thead>
-      <tbody id="bodacc-table-body">
-        <!-- Les lignes seront insérées par JavaScript -->
-      </tbody>
-    </table>
-  </div>
 
-  <script>
-    async function loadBodacc(siret) {
-      try {
-        const response = await fetch(`/bodacc?siret=${siret}`, { headers: { 'Accept': 'application/json' } });
-        const data = await response.json();
+<div class="result-card">
+  <h2>Annonces BODACC</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Tribunal</th>
+        <th>Référence</th>
+        <th>Description</th>
+        <th>PDF</th>
+      </tr>
+    </thead>
+    <tbody id="bodacc-table-body"></tbody>
+  </table>
+</div>
 
-        if (data.error) {
-          document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">${data.error}</p>`;
-          return;
-        }
-        if (!data.results.length) {
-          document.body.innerHTML = `<p style="text-align:center;">Aucune annonce BODACC trouvée pour ce SIRET.</p>`;
-          return;
-        }
+<script>
+  async function loadBodacc(siret) {
+    try {
+      const response = await fetch(`/bodacc?siret=${siret}`);
+      const data = await response.json();
 
-        const tbody = document.getElementById('bodacc-table-body');
-        data.results.forEach(r => {
-          const tr = document.createElement('tr');
+      const tbody = document.getElementById('bodacc-table-body');
+      tbody.innerHTML = '';
 
-          tr.innerHTML = `
-            <td data-label="Date de parution">${r.date_parution || ''}</td>
-            <td data-label="Type d'avis">${r.type_avis || r.type_document || ''}</td>
-            <td data-label="Tribunal">${r.tribunal || r.source || ''}</td>
-            <td data-label="Référence">${r.reference || r.numeroannonce || ''}</td>
-            <td data-label="Description">${r.description || ''}</td>
-            <td data-label="PDF">${r.pdf_url ? `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer">Voir PDF</a>` : 'N/A'}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">Erreur lors du chargement des annonces BODACC.</p>`;
-        console.error(err);
+      if (!data.results.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Aucune annonce trouvée.</td></tr>`;
+        return;
       }
-    }
 
-    // Remplace par le SIRET que tu veux tester ici
-    const siret = new URLSearchParams(window.location.search).get('siret');
-    if (siret) {
-      loadBodacc(siret);
-    } else {
-      document.body.innerHTML = `<p style="color:red; text-align:center; font-weight:600;">SIRET non fourni.</p>`;
+      data.results.forEach(item => {
+        const tr = document.createElement('tr');
+
+        const createCell = (text) => {
+          const td = document.createElement('td');
+          td.textContent = text || '';
+          return td;
+        };
+
+        tr.appendChild(createCell(item.date_parution));
+        tr.appendChild(createCell(item.type_avis || item.type_document));
+        tr.appendChild(createCell(item.tribunal || item.source));
+        tr.appendChild(createCell(item.reference || item.numeroannonce));
+        tr.appendChild(createCell(item.description));
+
+        const pdfCell = document.createElement('td');
+        if (item.pdf_url) {
+          const link = document.createElement('a');
+          link.href = item.pdf_url;
+          link.target = '_blank';
+          link.className = 'pdf-button';
+          link.textContent = '📄 Voir PDF';
+          pdfCell.appendChild(link);
+        } else {
+          pdfCell.textContent = 'N/A';
+        }
+
+        tr.appendChild(pdfCell);
+        tbody.appendChild(tr);
+      });
+
+    } catch (err) {
+      document.body.innerHTML = `<p style="text-align:center; color:red;">Erreur de chargement</p>`;
+      console.error(err);
     }
-  </script>
+  }
+
+  const siret = new URLSearchParams(window.location.search).get('siret');
+  if (siret) {
+    loadBodacc(siret);
+  } else {
+    document.body.innerHTML = `<p style="text-align:center; color:red;">Aucun SIRET fourni</p>`;
+  }
+</script>
+
 </body>
 </html>
