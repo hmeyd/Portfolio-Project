@@ -103,7 +103,7 @@ def register():
         conn.close()
         session["user"] = phone or email
         return redirect(url_for("search_company"))
-    return render_template("register.html")
+    return render_template("search.html")
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
