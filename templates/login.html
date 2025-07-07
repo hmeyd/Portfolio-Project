@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registre Entreprise - Connexion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8fbfd;
+      color: #1f3e46;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      background: #2a6f97;
+      color: #fff;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { font-size: 1.8rem; }
+    header img { height: 40px; }
+
+    main.hero {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 5%;
+      gap: 40px;
+    }
+    .hero-text {
+      flex: 1;
+      max-width: 480px;
+    }
+    .hero-text p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 1s forwards;
+    }
+    .hero-image img {
+      width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      opacity: 0;
+      animation: fadeUp 1.2s forwards;
+    }
+
+    .login-box {
+      flex: 1 1 340px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      padding: 40px;
+      opacity: 0;
+      animation: fadeUp 1.4s forwards;
+    }
+    .login-box h2 {
+      margin-bottom: 24px;
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: #2a6f97;
+      text-align: center;
+    }
+    .login-box .alert.danger {
+      color: red;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border: 1px solid #d3e2ea;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    .login-box input:focus {
+      outline: none;
+      border-color: #489fb5;
+      box-shadow: 0 0 4px rgba(72,159,181,0.3);
+    }
+    .login-box .btn {
+      width: 100%;
+      padding: 14px;
+      background: #2a6f97;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .login-box .btn:hover {
+      background: #1f5576;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+    }
+    .login-box a {
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      text-align: center;
+      color: #489fb5;
+    }
+    .login-box a:hover {
+      text-decoration: underline;
+    }
+
+    footer.footer {
+      background: #2a6f97;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+    footer.footer .social a {
+      margin: 0 6px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #1f5a7a;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+    footer.footer .social a:hover {
+      background: #167185;
+    }
+    footer.footer svg {
+      fill: #fff;
+      width: 20px;
+      height: 20px;
+    }
+
+    @keyframes fadeUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      main.hero { flex-direction: column; padding: 40px 5%; }
+      .hero-image img { width: 100%; max-width: 280px; }
+    }
+
+    .social-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.social-links a {
+  width: 40px;
+  height: 40px;
+  background: #1f5a7a;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.social-links a:hover {
+  background: #167185;
+}
+
+.social-links a.github { background: #333; }
+.social-links a.linkedin { background: #0077b5; }
+.social-links a.whatsapp { background: #25D366; }
+.social-links a.twitter { background: #1DA1F2; }
+
+  .btn-login { 
+      background: #2a6f97;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      margin-top: 16px;
+
+    }
+    .btn-login:hover {
+      background: #1f5576;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Registre Entreprise</h1>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    
+  </header>
+
+  <main class="hero">
+    <div class="hero-text">
+      <p>Bienvenue sur notre moteur de recherche d'entreprises françaises.</p>
+      <p>Retrouvez les informations clés grâce au numéro SIRET.</p>
+      <p>Connectez-vous pour accéder à toutes les fonctionnalités.</p>
+    </div>
+
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='immeuble.jpg') }}" alt="Illustration">
+    </div>
+
+    <div class="login-box">
+      <h2>Se connecter</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <p class="alert {{ category }}">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+       <form method="POST" action="/login">
+        <label for="email">Adresse e-mail</label>
+        <input type="email" id="email" name="email" required />
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required />
+
+        <div class="options-row">
+          <div>
+            <input type="checkbox" id="remember">
+            <label for="remember">Se souvenir de mes identifiants</label>
+          </div>
+          <a href="{{ url_for('forgot_password') }}" class="forgot-password">Mot de passe oublié ?</a>
+          <a href="{{ url_for('register') }}" class="register-link">Créer un compte</a>
+        </div>
+
+        <button type="submit" class="btn-login">S'identifier</button>
+
+      </form>
+    </div>
+  </main>
+
+ <footer class="footer">
+    <p>Suivez-nous</p>
+   <div class="social-links">
+  <a href="https://github.com" target="_blank" class="github"><i class="fab fa-github"></i></a>
+  <a href="https://linkedin.com" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a>
+  <a href="https://whatsapp.com" target="_blank" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://x.com" target="_blank" class="twitter"><i class="fab fa-twitter"></i></a>
+
+</div>
+
+    <p>&copy; 2025 Registre Entreprise. Tous droits réservés.</p>
+    
+  </footer>
+
+</body>
+</html>
