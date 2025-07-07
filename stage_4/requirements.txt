@@ -31,7 +31,6 @@ jsonschema==3.2.0
 lxml==5.4.0
 MarkupSafe==3.0.2
 more-itertools==8.10.0
-mysqlclient==2.1.1   # Vérifie usage / config MySQL
 oauthlib==3.2.0
 packaging==25.0
 pdfkit==1.0.0       # Voir buildpack wkhtmltopdf sur Heroku
@@ -49,4 +48,4 @@ Flask-SQLAlchemy==3.1.1
 python-dotenv==1.1.0
 gunicorn==22.0.0
 requests==2.31.0
-
+PyMySQL==1.0.2

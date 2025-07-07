@@ -11,6 +11,8 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # Charger les variables d'environnement
 load_dotenv()
