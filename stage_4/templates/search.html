@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recherche Entreprise</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     * {
       margin: 0;
@@ -19,7 +18,6 @@
       background: #000;
     }
 
-    /* Header */
     .top-nav {
       position: absolute;
       top: 0;
@@ -44,7 +42,6 @@
       background: rgba(255, 255, 255, 0.25);
     }
 
-    /* Hero avec vidéo */
     .hero-search {
       position: relative;
       height: 100vh;
@@ -114,7 +111,6 @@
       background: #ddd;
     }
 
-    /* Footer */
     .footer {
       text-align: center;
       padding: 20px;
@@ -134,7 +130,6 @@
       color: #fff;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .hero-content h1 {
         font-size: 1.6rem;
@@ -149,6 +144,55 @@
       .search-form button {
         width: 100%;
       }
+          .social-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.social-links a {
+  width: 40px;
+  height: 40px;
+  background: #1f5a7a;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.social-links a:hover {
+  background: #167185;
+}
+
+.social-links a.github { background: #333; }
+.social-links a.linkedin { background: #0077b5; }
+.social-links a.whatsapp { background: #25D366; }
+.social-links a.twitter { background: #1DA1F2; }
+
+  .btn-login { 
+      background: #2a6f97;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      margin-top: 16px;
+
+    }
+    .btn-login:hover {
+      background: #1f5576;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+    }
     }
   </style>
 </head>
@@ -158,7 +202,7 @@
   <header class="top-nav">
     <a href="/login" class="connect-button">
       <i class="fas fa-user-circle"></i>
-      <span>deConnexion</span>
+      <span>Déconnexion</span>
     </a>
   </header>
 
@@ -177,21 +221,21 @@
         <input type="text" name="siret" placeholder="Numéro SIRET" required />
         <button type="submit"><i class="fas fa-search"></i></button>
       </form>
-     
-      </div>
     </div>
   </section>
 
   <!-- Pied de page -->
-  <footer class="footer">
+   <footer class="footer">
     <p>Suivez-nous</p>
-    <div class="social-links">
-      <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-      <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
-      <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
-      <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
-    </div>
-    <p>&copy; 2025 Registre Entreprise</p>
+   <div class="social-links">
+  <a href="https://github.com" target="_blank" class="github"><i class="fab fa-github"></i></a>
+  <a href="https://linkedin.com" target="_blank" class="linkedin"><i class="fab fa-linkedin"></i></a>
+  <a href="https://whatsapp.com" target="_blank" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://x.com" target="_blank" class="twitter"><i class="fab fa-twitter"></i></a>
+  </div>
+
+    <p>&copy; 2025 Registre Entreprise. Tous droits réservés.</p>
+    
   </footer>
 
 </body>

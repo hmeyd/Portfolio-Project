@@ -103,7 +103,7 @@ def register():
         conn.close()
         session["user"] = phone or email
         return redirect(url_for("search_company"))
-    return render_template("search.html")
+    return render_template("register.html")
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -192,13 +192,15 @@ def search_company():
 
 
 
-def generate_pdf_url(annonce):
+import requests
+
+def generate_pdf_url(annonce, max_attempts=3):
     publicationavis = annonce.get("publicationavis", "A")
     parution = annonce.get("parution", "")
-    numerodossier = annonce.get("numerodossier", "0")
+    numerodossier = int(annonce.get("numerodossier", "0"))
 
     numero_annonce = annonce.get("numeroannonce", "")
-    numero_annonce_str = str(numero_annonce)  # Convertir en chaîne
+    numero_annonce_str = str(numero_annonce)
 
     if numero_annonce_str.isdigit():
         numero_annonce_str = numero_annonce_str.zfill(5)
@@ -212,27 +214,28 @@ def generate_pdf_url(annonce):
         f"{annee}/{parution}/"
     )
 
-    # Première tentative avec numerodossier (0 ou autre)
-    url_0 = f"{base_url}{numerodossier}/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
-    
-    # On fait une requête HEAD pour tester si le fichier existe
-    try:
-        response = requests.head(url_0)
-        if response.status_code == 200:
-            return url_0
-        else:
-            # Si le dossier est "0", on essaye avec "1"
-            if numerodossier == "0":
-                url_1 = f"{base_url}1/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
-                response2 = requests.head(url_1)
-                if response2.status_code == 200:
-                    return url_1
-            # Sinon on retourne quand même la première url
-                url_3 = f"{base_url}2/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
-            return url_3
-    except requests.RequestException:
-        # En cas d'erreur réseau on retourne quand même la première url
-        return url_0
+    attempts = 0
+    while attempts < max_attempts:
+        url = (
+            f"{base_url}{numerodossier}/BODACC_{publicationavis}_PDF_Unitaire_"
+            f"{parution}_{numero_annonce_str}.pdf"
+        )
+        try:
+            response = requests.head(url)
+            if response.status_code == 200:
+                return url
+        except requests.RequestException:
+            pass  # Ignore les erreurs réseau pour continuer la boucle
+
+        numerodossier += 1
+        attempts += 1
+
+    # Si aucune URL valide trouvée, retourne la première tentative par défaut
+    return (
+        f"{base_url}0/BODACC_{publicationavis}_PDF_Unitaire_"
+        f"{parution}_{numero_annonce_str}.pdf"
+    )
+
 import json
 from flask import jsonify
 
