@@ -103,7 +103,7 @@ def register():
         conn.close()
         session["user"] = phone or email
         return redirect(url_for("search_company"))
-    return render_template("register.html")
+    return render_template("search.html")
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -187,26 +187,14 @@ def search_company():
             return render_template("search.html", error=f"Erreur de connexion : {e}")
     return render_template("search.html")
 
-
-
-
-
-
 import requests
 
-def generate_pdf_url(annonce, max_attempts=3):
+def generate_pdf_url(annonce):
     publicationavis = annonce.get("publicationavis", "A")
     parution = annonce.get("parution", "")
-    numerodossier = int(annonce.get("numerodossier", "0"))
-
+    numerodossier = annonce.get("numerodossier", "0")
     numero_annonce = annonce.get("numeroannonce", "")
-    numero_annonce_str = str(numero_annonce)
-
-    if numero_annonce_str.isdigit():
-        numero_annonce_str = numero_annonce_str.zfill(5)
-    else:
-        numero_annonce_str = "00000"
-
+    numero_annonce_str = str(numero_annonce).zfill(5) if str(numero_annonce).isdigit() else "00000"
     annee = parution[:4] if len(parution) >= 4 else "0000"
 
     base_url = (
@@ -214,27 +202,20 @@ def generate_pdf_url(annonce, max_attempts=3):
         f"{annee}/{parution}/"
     )
 
-    attempts = 0
-    while attempts < max_attempts:
-        url = (
-            f"{base_url}{numerodossier}/BODACC_{publicationavis}_PDF_Unitaire_"
-            f"{parution}_{numero_annonce_str}.pdf"
-        )
+    # Tester jusqu'à 3 dossiers différents
+    for dossier_num in range(3):
+        url = f"{base_url}{dossier_num}/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
         try:
-            response = requests.head(url)
+            response = requests.head(url, timeout=2)
             if response.status_code == 200:
                 return url
         except requests.RequestException:
-            pass  # Ignore les erreurs réseau pour continuer la boucle
+            pass
 
-        numerodossier += 1
-        attempts += 1
+    # Retourne une URL par défaut (même si le fichier n'existe pas)
+    return f"{base_url}0/BODACC_{publicationavis}_PDF_Unitaire_{parution}_{numero_annonce_str}.pdf"
 
-    # Si aucune URL valide trouvée, retourne la première tentative par défaut
-    return (
-        f"{base_url}0/BODACC_{publicationavis}_PDF_Unitaire_"
-        f"{parution}_{numero_annonce_str}.pdf"
-    )
+
 
 import json
 from flask import jsonify
@@ -363,4 +344,7 @@ def prospection():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
