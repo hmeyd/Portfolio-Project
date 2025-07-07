@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer un compte</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  
+</head>
+<body>
+
+  <header>
+    <h1>Registre Entreprise</h1>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+  </header>
+
+  <main class="hero">
+    <div class="hero-text">
+      <p>Bienvenue sur notre plateforme de création de compte entreprise.</p>
+      <p>Complétez le formulaire pour accéder à nos services.</p>
+    </div>
+
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='immeuble.jpg') }}" alt="Illustration">
+    </div>
+
+    <div class="login-box">
+      <h2>Créer un compte</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <p class="alert {{ category }}">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <label for="name">Prénom</label>
+        <input type="text" name="name" required> 
+        <label for="lastname">Nom</label>
+        <input type="text" name="lastname" required>
+        <label for="email">Adresse e-mail</label>
+        <input type="email" name="email" required>
+        <label for="phone">Numéro de téléphone</label>
+        <input type="text" name="phone" required>
+        <label for="password">Mot de passe</label>
+        <input type="password" name="password" required>
+
+        <button type="submit" class="btn btn-login">Créer un compte</button>
+      </form>
+
+      <a href="{{ url_for('search_company') }}" class="register-link">Déjà un compte ? Se connecter</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Suivez-nous</p>
+    <div class="social-links">
+  <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+  <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+  <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://x.com" target="_blank" class="twitter"><i class="fab fa-twitter"></i></a>
+</div>
+    <p>&copy; 2025 Registre Entreprise. Tous droits réservés.</p>
+    
+  </footer>
+
+</body>
+
+</html>
