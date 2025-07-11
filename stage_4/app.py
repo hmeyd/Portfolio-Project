@@ -18,6 +18,7 @@ pymysql.install_as_MySQLdb()
 load_dotenv()
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 bcrypt = Bcrypt(app)
 app.secret_key = secrets.token_hex(16)
 
@@ -105,7 +106,7 @@ def register():
         conn.close()
         session["user"] = phone or email
         return redirect(url_for("search_company"))
-    return render_template("search.html")
+    return render_template("register.html")
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
