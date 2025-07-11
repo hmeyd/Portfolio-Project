@@ -1,1 +1,1 @@
-web: gunicorn apps.registe-entreprise.app:app
+web: gunicorn app:app
