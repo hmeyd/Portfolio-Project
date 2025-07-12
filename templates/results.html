@@ -1,3 +1,4 @@
+ </style>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -143,7 +144,6 @@ iframe {
     .footer .social-links a:hover {
       color: #fff;
     }
-    
   </style>
 </head>
 <body>
@@ -152,8 +152,8 @@ iframe {
     <nav>
       <a href="{{ url_for('search_company') }}"><i class="fas fa-search"></i> Recherche</a>
       <a href="#" id="bodacc-link"><i class="fas fa-chart-line"></i> Annonces et Publications</a>
-      <a href="#"><i class="fas fa-newspaper"></i> Articles</a>
-      <a href="#"><i class="fas fa-sticky-note"></i> Notes</a>
+      <a href="{{ url_for('articles') }}"><i class="fas fa-newspaper"></i> Articles</a>
+      <a href="{{ url_for('about') }}"><i class="fas fa-sticky-note"></i> About us</a>
       <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a>
     </nav>
   </aside>
@@ -164,11 +164,9 @@ iframe {
     </header>
 
     <div class="content">
-
       {% if error %}
         <div class="card"><p class="error">{{ error }}</p></div>
       {% elif data %}
-        <!-- Carte entreprise -->
         <div class="card" id="entreprise-card">
           <h3>{{ data.uniteLegale.denominationUniteLegale or 'Entreprise inconnue' }}</h3>
           <p><strong>SIRET:</strong> {{ data.siret }}</p>
@@ -189,7 +187,6 @@ iframe {
           <p><strong>Statut administratif:</strong> {{ data.uniteLegale.etatAdministratifUniteLegale or 'N/A' }}</p>
         </div>
 
-        <!-- Section dirigeants -->
         <div class="card dirigeants" id="dirigeants-card">
           <h3>Dirigeants</h3>
           {% if dirigeants %}
@@ -213,134 +210,107 @@ iframe {
         </div>
       {% endif %}
 
-      <!-- Résultats BODACC dynamiques ici -->
       <div id="bodacc-results"></div>
-
     </div>
 
     <footer>
       &copy; 2025 Registre Entreprise. Tous droits réservés.
       <p>Suivez-nous</p>
-    <div class="social-links">
-      <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-      <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
-      <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
-      <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
-    </div>
+      <div class="social-links">
+        <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
+      </div>
     </footer>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-  const navLinks = document.querySelectorAll("aside nav a");
-  const bodaccLink = document.getElementById("bodacc-link");
-  const contentDiv = document.getElementById("bodacc-results");
-  const entrepriseCard = document.getElementById("entreprise-card");
-  const dirigeantsCard = document.getElementById("dirigeants-card");
-  const siret = "{{ data.siret if data else '' }}";
+      const navLinks = document.querySelectorAll("aside nav a");
+      const bodaccLink = document.getElementById("bodacc-link");
+      const contentDiv = document.getElementById("bodacc-results");
+      const entrepriseCard = document.getElementById("entreprise-card");
+      const dirigeantsCard = document.getElementById("dirigeants-card");
+      const siret = "{{ data.siret if data else '' }}";
 
-  // Fonction pour enlever la classe active de tous les liens
-  function clearActive() {
-    navLinks.forEach(link => link.classList.remove("active"));
-  }
-
-  // Par défaut, activer le lien Recherche si la page est chargée sans clic (tu peux adapter selon ta logique)
-  const currentUrl = window.location.pathname;
-  navLinks.forEach(link => {
-    // Par exemple activer Recherche si URL contient 'search_company'
-    if (link.href.includes("search_company") && !link.id) {
-      clearActive();
-      link.classList.add("active");
-    }
-  });
-
-  // Gérer le clic sur Bodacc
-  bodaccLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    clearActive();
-    bodaccLink.classList.add("active");
-
-    // Masquer la carte entreprise ET la section dirigeants
-    if (entrepriseCard) entrepriseCard.style.display = "none";
-    if (dirigeantsCard) dirigeantsCard.style.display = "none";
-
-    if (!siret) {
-      contentDiv.innerHTML = "<div class='card'><p>Aucun SIRET disponible.</p></div>";
-      return;
-    }
-
-    contentDiv.innerHTML = "<div class='card'><p>Chargement des annonces BODACC...</p></div>";
-
-    try {
-      const res = await fetch(`/bodacc?siret=${siret}`, {
-        headers: { "Accept": "application/json" }
-      });
-      const data = await res.json();
-
-      if (data.error) {
-        contentDiv.innerHTML = `<div class='card'><p>${data.error}</p></div>`;
-      } else if (data.results.length === 0) {
-        contentDiv.innerHTML = `<div class='card'><p>Aucune annonce trouvée pour ce SIREN.</p></div>`;
-      } else {
-        let html = `
-          <div class="card">
-            <h3>Annonces BODACC</h3>
-            <table style="width:100%; border-collapse: collapse; font-weight: 300; font-size: 0.95rem; color: #333;">
-              <thead>
-                <tr style="background-color: #e0f0fb; font-weight: 600; color: #2a6f97;">
-                  <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Date de parution</th>
-                  <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Type d'avis</th>
-                  <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Tribunal</th>
-                  <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Référence</th>
-                  <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Description</th>
-                  <th style="padding: 12px 10px; border-bottom: 1px solid #ddd;">PDF</th>
-                </tr>
-              </thead>
-              <tbody>`;
-        data.results.forEach(r => {
-          html += `
-            <tr>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.date_parution}</td>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.type_avis || r.type_document}</td>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.tribunal || r.source || ''}</td>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.reference || r.numeroannonce || ''}</td>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.description || ''}</td>
-              <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">
-                ${r.pdf_url ? `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer">Voir PDF</a>` : "N/A"}
-              </td>
-            </tr>`;
-        });
-        html += `
-              </tbody>
-            </table>
-          </div>
-        `;
-        contentDiv.innerHTML = html;
+      function clearActive() {
+        navLinks.forEach(link => link.classList.remove("active"));
       }
-    } catch (err) {
-      contentDiv.innerHTML = `<div class='card'><p>Erreur lors du chargement des annonces.</p></div>`;
-      console.error(err);
-    }
-  });
 
-  // Si tu as d'autres liens cliquables comme Recherche, tu peux ajouter aussi :
-  navLinks.forEach(link => {
-    if (link.id !== "bodacc-link") {
-      link.addEventListener("click", () => {
-        clearActive();
-        link.classList.add("active");
-
-        // Ici tu peux gérer l'affichage du contenu pour ces liens,
-        // par exemple afficher les cartes entreprise et dirigeants et masquer bodacc-results
-        if (entrepriseCard) entrepriseCard.style.display = "";
-        if (dirigeantsCard) dirigeantsCard.style.display = "";
-        contentDiv.innerHTML = ""; // vider contenu bodacc si besoin
+      const currentUrl = window.location.pathname;
+      navLinks.forEach(link => {
+        if (link.href.includes("search_company") && !link.id) {
+          clearActive();
+          link.classList.add("active");
+        }
       });
-    }
-  });
-});
 
+      bodaccLink.addEventListener("click", async (e) => {
+        e.preventDefault();
+        clearActive();
+        bodaccLink.classList.add("active");
+
+        if (entrepriseCard) entrepriseCard.style.display = "none";
+        if (dirigeantsCard) dirigeantsCard.style.display = "none";
+
+        if (!siret) {
+          contentDiv.innerHTML = "<div class='card'><p>Aucun SIRET disponible.</p></div>";
+          return;
+        }
+
+        contentDiv.innerHTML = "<div class='card'><p>Chargement des annonces BODACC...</p></div>";
+
+        try {
+          const res = await fetch(`/bodacc?siret=${siret}`, {
+            headers: { "Accept": "application/json" }
+          });
+          const data = await res.json();
+
+          if (data.error) {
+            contentDiv.innerHTML = `<div class='card'><p>${data.error}</p></div>`;
+          } else if (data.results.length === 0) {
+            contentDiv.innerHTML = `<div class='card'><p>Aucune annonce trouvée pour ce SIREN.</p></div>`;
+          } else {
+            let html = `
+              <div class="card">
+                <h3>Annonces BODACC</h3>
+                <table style="width:100%; border-collapse: collapse; font-weight: 300; font-size: 0.95rem; color: #333;">
+                  <thead>
+                    <tr style="background-color: #e0f0fb; font-weight: 600; color: #2a6f97;">
+                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Date de parution</th>
+                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Type d'avis</th>
+                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Tribunal</th>
+                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Référence</th>
+                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Description</th>
+                      <th style="padding: 12px 10px; border-bottom: 1px solid #ddd;">PDF</th>
+                    </tr>
+                  </thead>
+                  <tbody>`;
+
+            data.results.forEach(r => {
+              html += `
+                <tr>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.date_parution}</td>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.type_avis || r.type_document}</td>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.tribunal || r.source || ''}</td>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.reference || r.numeroannonce || ''}</td>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.description || ''}</td>
+                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">
+                    ${r.pdf_url ? `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer">Voir PDF</a>` : "N/A"}
+                  </td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            contentDiv.innerHTML = html;
+          }
+        } catch (error) {
+          contentDiv.innerHTML = `<div class='card'><p>Erreur de chargement des données.</p></div>`;
+        }
+      });
+    });
   </script>
 </body>
 </html>
+

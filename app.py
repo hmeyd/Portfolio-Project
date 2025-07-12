@@ -107,6 +107,14 @@ def register():
         return redirect(url_for("search_company"))
     return render_template("register.html")
 
+@app.route('/articles')
+def articles():
+    return render_template('Article.html')
+
+@app.route('/about')
+def about():
+    return render_template('Aboutus.html')
+
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
