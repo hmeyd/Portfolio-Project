@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registre Entreprise – Landing Page</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/138/138292.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #F4F7FA;
+      color: #1F2937;
+      line-height: 1.6;
+    }
+    header {
+      background: #2A6F97;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5rem;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+    }
+    .nav {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .nav a {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .intro {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .intro img {
+      width: 140px;
+      margin-bottom: 1rem;
+    }
+    .intro h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+    .btn-primary {
+      padding: 12px 24px;
+      background: #2A6F97;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem 1rem;
+      background: #FFFFFF;
+    }
+    .feature-card {
+      flex: 1 1 300px;
+      max-width: 360px;
+      background: #F0F4F8;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .feature-card img {
+      width: 50px;
+      margin-bottom: 1rem;
+    }
+    .feature-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .about {
+      padding: 3rem 1rem;
+      background: #E5F3FB;
+      text-align: center;
+    }
+    .about h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .about p {
+      max-width: 700px;
+      margin: auto;
+      font-size: 1rem;
+    }
+    .team {
+      margin-top: 2rem;
+    }
+    .team a {
+      display: inline-block;
+      margin: 5px 10px;
+      color: #2A6F97;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .articles {
+      background: #FEFEFE;
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+    .articles h2 {
+      font-size: 2rem;
+      color: #2A6F97;
+      margin-bottom: 2rem;
+    }
+    .accordion {
+      max-width: 800px;
+      margin: auto;
+      text-align: left;
+    }
+    .accordion-item {
+      margin-bottom: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #ccc;
+    }
+    .accordion-title {
+      background: #E5F3FB;
+      color: #1F2937;
+      padding: 1rem;
+      width: 100%;
+      text-align: left;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .accordion-title:hover {
+      background: #D7EBF7;
+    }
+    .accordion-content {
+      display: none;
+      padding: 1rem;
+      background: #fff;
+      border-top: 1px solid #ccc;
+    }
+    footer {
+      background: #2A6F97;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+      .intro h2 {
+        font-size: 1.2rem;
+      }
+      .nav {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Registre Entreprise</h1>
+    <p>Explorez les entreprises françaises en un clic</p>
+    <div class="nav">
+      <a href="#features">Fonctionnalités</a>
+      <a href="#articles">Articles</a>
+      <a href="#about">À propos</a>
+      <a href="https://portfolio-project-3-adaz.onrender.com" target="_blank">Publications</a>
+      <a href="https://github.com/hmeyd/Portfolio-Project" target="_blank">Code</a>
+      <a href="https://portfolio-project-3-adaz.onrender.com" target="_blank">App</a>
+    </div>
+  </header>
+  <section class="intro">
+    <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="icone entreprise" />
+    <h2>Consultez les données légales et les dirigeants d’une entreprise</h2>
+    <a href="https://portfolio-project-3-adaz.onrender.com" class="btn-primary">Lancer l'application</a>
+  </section>
+  <section id="features" class="features">
+    <div class="feature-card">
+      <img src="https://cdn-icons-png.flaticon.com/512/545/545705.png" alt="Recherche">
+      <h3>Recherche SIRET</h3>
+      <p>Trouvez une entreprise française par son numéro SIRET en temps réel grâce à l’API INSEE.</p>
+    </div>
+    <div class="feature-card">
+      <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="BODACC">
+      <h3>Annonces & Publications</h3>
+      <p>Affichez les publications légales d'une entreprise au BODACC avec lien vers le PDF officiel.</p>
+    </div>
+    <div class="feature-card">
+      <img src="https://cdn-icons-png.flaticon.com/512/476/476863.png" alt="Dirigeants">
+      <h3>Informations dirigeant</h3>
+      <p>Accédez aux dirigeants associés à une entreprise et leurs statuts administratifs.</p>
+    </div>
+  </section>
+  <section id="articles" class="articles">
+    <h2>Articles utiles</h2>
+    <div class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-title">Comprendre le SIRET, le SIREN et le code APE</button>
+        <div class="accordion-content">
+          <p>Le numéro SIRET identifie chaque établissement. Le SIREN est commun à tous les établissements d’une entreprise. Le code APE reflète l’activité principale.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-title">Que signifie une publication au BODACC ?</button>
+        <div class="accordion-content">
+          <p>Le BODACC publie les annonces légales d’une entreprise : créations, ventes, liquidations judiciaires, etc.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-title">Comment lire les statuts d’une entreprise ?</button>
+        <div class="accordion-content">
+          <p>Les statuts définissent l’activité, la répartition du capital, les pouvoirs des dirigeants et les règles internes de l’entreprise.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-title">Comment créer une entreprise en France ?</button>
+        <div class="accordion-content">
+          <p>Définir l’activité, choisir une forme juridique, rédiger les statuts, déposer le capital, enregistrer au RCS et publier un avis de constitution.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="about" class="about">
+    <h3>À propos du projet</h3>
+    <p>
+      Ce projet a été réalisé dans le cadre du Portfolio Project de Holberton School.
+      L'objectif est de faciliter l'accès aux données officielles des entreprises françaises grâce à une interface claire et moderne.
+    </p>
+    <div class="team">
+      <p><strong>Équipe :</strong></p>
+      <a href="https://github.com/hmeyd" target="_blank">Ahmed</a>
+      <a href="https://github.com/Elodie-mbaye" target="_blank">Elodie</a>
+      <a href="https://github.com/Myri-fid" target="_blank">Myriam</a>
+      <a href="https://github.com/Mame-Penda" target="_blank">Mame</a>
+    </div>
+    <p style="margin-top: 1rem;">
+      <a href="https://github.com/hmeyd/Portfolio-Project" target="_blank">Voir le code source sur GitHub</a>
+    </p>
+  </section>
+  <footer>
+    &copy; 2025 Registre Entreprise – Tous droits réservés.
+  </footer>
+  <script>
+    const accordions = document.querySelectorAll(".accordion-title");
+    accordions.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const content = btn.nextElementSibling;
+        content.style.display = content.style.display === "block" ? "none" : "block";
+      });
+    });
+  </script>
+</body>
+</html>
