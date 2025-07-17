@@ -1,4 +1,3 @@
- </style>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -36,11 +35,11 @@
       border-radius: 6px;
       transition: background 0.3s;
     }
-    aside nav a:hover {
-      background-color: #1E293B;
-    }
-    aside nav a i {
-      margin-right: 12px;
+    aside nav a:hover, aside nav a.active {
+      background-color: #2A6F97;
+      color: #F1F5F9;
+      font-weight: 700;
+      box-shadow: 0 0 10px #2A6F97AA;
     }
     .main-content {
       flex: 1;
@@ -54,12 +53,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    header input[type="text"] {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      width: 300px;
     }
     .content {
       padding: 32px;
@@ -78,21 +71,53 @@
       font-size: 20px;
       color: #0F172A;
     }
-    .card p {
-      margin-bottom: 8px;
+    .accordion {
+      background-color: #2A6F97;
+      color: white;
+      padding: 18px;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+      width: 100%;
+      transition: 0.3s;
+      margin-top: 8px;
+      cursor: pointer;
     }
-    .dirigeants ul {
-      padding-left: 20px;
+    .accordion:hover {
+      background-color: #1E293B;
     }
-    .dirigeants li {
+    .panel {
+      background: #ffffff;
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      border: 1px solid #ddd;
       margin-bottom: 10px;
     }
-    iframe {
-      margin-top: 12px;
-      width: 100%;
-      height: 300px;
-      border: none;
-      border-radius: 8px;
+    .team {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+    .member {
+      text-align: center;
+      margin: 10px;
+    }
+    .member img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+    }
+    .socials {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .socials a {
+      font-size: 1.5rem;
+      margin: 0 10px;
+      color: #2A6F97;
     }
     footer {
       background: #0F172A;
@@ -100,217 +125,101 @@
       text-align: center;
       padding: 16px;
     }
-    @media (max-width: 768px) {
-      aside { display: none; }
-      header input[type="text"] { width: 100%; }
-    }
-    .error {
-      color: #b91c1c;
-      font-weight: 600;
-    }
-
-    aside nav a.active {
-  background-color: #2A6F97; /* bleu plus clair que le fond */
-  color: #F1F5F9;
-  font-weight: 700;
-  box-shadow: 0 0 10px #2A6F97AA;
-}
-
-iframe {
-  margin-top: 12px;
-  width: 100%;
-  height: 300px;
-  border: 2px solid #2A6F97; /* bordure bleue */
-  border-radius: 12px;
-  box-shadow: 0 0 16px rgba(42, 111, 151, 0.4); /* ombre plus visible */
-}
-
-/* Footer */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      background: #111;
-      color: #ccc;
-    }
-    .footer .social-links {
-      margin: 10px 0;
-    }
-    .footer .social-links a {
-      margin: 0 10px;
-      font-size: 1.4rem;
-      color: #ccc;
-      transition: color 0.3s;
-    }
-    .footer .social-links a:hover {
-      color: #fff;
-    }
   </style>
 </head>
 <body>
   <aside>
     <h2><i class="fas fa-user-circle"></i> Registre Entreprise</h2>
     <nav>
-    <a href="{{ url_for('search_company') }}" class="nav-link" data-endpoint="search_company"><i class="fas fa-search"></i> Recherche</a>
-    <a href="#" id="bodacc-link" class="nav-link" data-endpoint="bodacc"><i class="fas fa-chart-line"></i> Annonces et Publications</a>
-    <a href="{{ url_for('articles') }}" class="nav-link" data-endpoint="articles"><i class="fas fa-newspaper"></i> Articles</a>
-    <a href="{{ url_for('about') }}" class="nav-link" data-endpoint="about"><i class="fas fa-sticky-note"></i> About us</a>
-    <a href="{{ url_for('logout') }}" class="nav-link" data-endpoint="logout"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a>
-  </nav>
+      <a href="{{ url_for('search_company') }}" class="nav-link" data-section="entreprise"><i class="fas fa-search"></i> Recherche</a>
+      <a href="#" class="nav-link" data-section="bodacc"><i class="fas fa-chart-line"></i> Annonces et Publications</a>
+      <a href="{{ url_for('articles') }}" class="nav-link" data-section="articles"><i class="fas fa-newspaper"></i> Articles</a>
+      <a href="{{ url_for('about') }}" class="nav-link" data-section="about"><i class="fas fa-sticky-note"></i> About us</a>
+      <a href="{{ url_for('logout') }}" class="nav-link" data-section="logout"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a>
+    </nav>
   </aside>
 
   <div class="main-content">
     <header>
-      <span>Bienvenue</span>
+      <h1>Bienvenue sur le tableau de bord</h1>
     </header>
-
-    <div class="content">
-      {% if error %}
-        <div class="card"><p class="error">{{ error }}</p></div>
-      {% elif data %}
-        <div class="card" id="entreprise-card">
-          <h3>{{ data.uniteLegale.denominationUniteLegale or 'Entreprise inconnue' }}</h3>
-          <p><strong>SIRET:</strong> {{ data.siret }}</p>
-          <p><strong>Adresse:</strong>
-            {% set adresse =
-              (data.adresseEtablissement.numeroVoieEtablissement | default('')) ~ ' ' ~
-              (data.adresseEtablissement.typeVoieEtablissement | default('')) ~ ' ' ~
-              (data.adresseEtablissement.libelleVoieEtablissement | default('')) ~ ', ' ~
-              (data.adresseEtablissement.codePostalEtablissement | default('')) ~ ' ' ~
-              (data.adresseEtablissement.libelleCommuneEtablissement | default(''))
-            %}
-            {{ adresse }}
-          </p>
-          <iframe src="https://www.google.com/maps?q={{ adresse | urlencode }}&output=embed" allowfullscreen></iframe>
-          <p><strong>Date de création:</strong> {{ data.dateCreationEtablissement or 'N/A' }}</p>
-          <p><strong>Activité principale:</strong> {{ data.uniteLegale.activitePrincipaleUniteLegale or 'N/A' }}</p>
-          <p><strong>Effectif:</strong> {{ data.uniteLegale.trancheEffectifsUniteLegale or 'N/A' }}</p>
-          <p><strong>Statut administratif:</strong> {{ data.uniteLegale.etatAdministratifUniteLegale or 'N/A' }}</p>
-        </div>
-
-        <div class="card dirigeants" id="dirigeants-card">
-          <h3>Dirigeants</h3>
-          {% if dirigeants %}
-            <ul>
-              {% for d in dirigeants %}
-                <li>
-                  <strong>{{ d.prenom }} {{ d.nom }}</strong><br/>
-                  Fonction: {{ d.fonction or 'N/A' }}<br/>
-                  Nommé le: {{ d.date_nomination or 'N/A' }}<br/>
-                  Statut: {{ d.statut_administratif or 'N/A' }}
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p>Aucun dirigeant trouvé.</p>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="card">
-          <p>Aucune donnée à afficher.</p>
-        </div>
-      {% endif %}
-
-      <div id="bodacc-results"></div>
+    <div class="content" id="content-area">
+      <p>Veuillez sélectionner une section dans le menu.</p>
     </div>
-
     <footer>
       &copy; 2025 Registre Entreprise. Tous droits réservés.
-      <p>Suivez-nous</p>
-      <div class="social-links">
-        <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-        <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
-        <a href="https://whatsapp.com" target="_blank"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
-      </div>
     </footer>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const navLinks = document.querySelectorAll("aside nav a");
-      const bodaccLink = document.getElementById("bodacc-link");
-      const contentDiv = document.getElementById("bodacc-results");
-      const entrepriseCard = document.getElementById("entreprise-card");
-      const dirigeantsCard = document.getElementById("dirigeants-card");
-      const siret = "{{ data.siret if data else '' }}";
+      const navLinks = document.querySelectorAll(".nav-link");
+      const contentArea = document.getElementById("content-area");
 
-      function clearActive() {
-        navLinks.forEach(link => link.classList.remove("active"));
+      const sections = {
+        entreprise: `
+          <div class="card">
+            <h3>Données Entreprise</h3>
+            <p><strong>SIRET:</strong> 123 456 789 00017</p>
+            <p><strong>Adresse:</strong> 42 Rue de Python, 75000 Paris</p>
+            <p><strong>Date de création:</strong> 2021-07-01</p>
+            <p><strong>Activité principale:</strong> 6201Z - Programmation informatique</p>
+          </div>`,
+        articles: `
+          <div class="card">
+            <h3>Articles informatifs</h3>
+            <button class="accordion">Comprendre le SIRET, le SIREN et le code APE</button>
+            <div class="panel"><p>Le <strong>SIRET</strong> est un identifiant unique pour chaque établissement...</p></div>
+            <button class="accordion">Que signifie une publication au BODACC ?</button>
+            <div class="panel"><p>Le <strong>BODACC</strong> publie les événements légaux d’une entreprise...</p></div>
+            <button class="accordion">Comment lire les statuts d’une entreprise française ?</button>
+            <div class="panel"><p>Les statuts définissent les règles de fonctionnement d’une société...</p></div>
+          </div>`,
+        about: `
+          <div class="card">
+            <h3>À propos de nous</h3>
+            <p>Ce site est le fruit d’un projet tutoré mené à Holberton School.</p>
+            <div class="team">
+              <div class="member"><img src="images/myriam.png" alt="Myriam"><h3>Myriam</h3><p>Frontend/Backend</p></div>
+              <div class="member"><img src="images/elodie.png" alt="Elodie"><h3>Elodie</h3><p>Frontend/Backend</p></div>
+              <div class="member"><img src="images/Mame.png" alt="Mame"><h3>Mame</h3><p>Frontend/Backend</p></div>
+              <div class="member"><img src="images/ahmed.png" alt="Ahmed"><h3>Ahmed</h3><p>Frontend/Backend</p></div>
+            </div>
+            <div class="socials">
+              <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+              <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+              <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            </div>
+          </div>`
+      };
+
+      function activateSection(section) {
+        contentArea.innerHTML = sections[section] || "<p>Section introuvable</p>";
+
+        const accordions = contentArea.querySelectorAll(".accordion");
+        accordions.forEach(btn => {
+          btn.addEventListener("click", function () {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+              panel.style.display = "none";
+            } else {
+              panel.style.display = "block";
+            }
+          });
+        });
       }
 
-      const currentUrl = window.location.pathname;
       navLinks.forEach(link => {
-        if (link.href.includes("search_company") && !link.id) {
-          clearActive();
+        link.addEventListener("click", e => {
+          e.preventDefault();
+          navLinks.forEach(l => l.classList.remove("active"));
           link.classList.add("active");
-        }
-      });
-
-      bodaccLink.addEventListener("click", async (e) => {
-        e.preventDefault();
-        clearActive();
-        bodaccLink.classList.add("active");
-
-        if (entrepriseCard) entrepriseCard.style.display = "none";
-        if (dirigeantsCard) dirigeantsCard.style.display = "none";
-
-        if (!siret) {
-          contentDiv.innerHTML = "<div class='card'><p>Aucun SIRET disponible.</p></div>";
-          return;
-        }
-
-        contentDiv.innerHTML = "<div class='card'><p>Chargement des annonces BODACC...</p></div>";
-
-        try {
-          const res = await fetch(`/bodacc?siret=${siret}`, {
-            headers: { "Accept": "application/json" }
-          });
-          const data = await res.json();
-
-          if (data.error) {
-            contentDiv.innerHTML = `<div class='card'><p>${data.error}</p></div>`;
-          } else if (data.results.length === 0) {
-            contentDiv.innerHTML = `<div class='card'><p>Aucune annonce trouvée pour ce SIREN.</p></div>`;
-          } else {
-            let html = `
-              <div class="card">
-                <h3>Annonces BODACC</h3>
-                <table style="width:100%; border-collapse: collapse; font-weight: 300; font-size: 0.95rem; color: #333;">
-                  <thead>
-                    <tr style="background-color: #e0f0fb; font-weight: 600; color: #2a6f97;">
-                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Date de parution</th>
-                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Type d'avis</th>
-                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Tribunal</th>
-                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Référence</th>
-                      <th style="padding: 12px 10px; text-align:left; border-bottom: 1px solid #ddd;">Description</th>
-                      <th style="padding: 12px 10px; border-bottom: 1px solid #ddd;">PDF</th>
-                    </tr>
-                  </thead>
-                  <tbody>`;
-
-            data.results.forEach(r => {
-              html += `
-                <tr>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.date_parution}</td>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.type_avis || r.type_document}</td>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.tribunal || r.source || ''}</td>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.reference || r.numeroannonce || ''}</td>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">${r.description || ''}</td>
-                  <td style="padding: 12px 10px; border-bottom: 1px solid #ddd;">
-                    ${r.pdf_url ? `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer">Voir PDF</a>` : "N/A"}
-                  </td>
-                </tr>`;
-            });
-
-            html += `</tbody></table></div>`;
-            contentDiv.innerHTML = html;
-          }
-        } catch (error) {
-          contentDiv.innerHTML = `<div class='card'><p>Erreur de chargement des données.</p></div>`;
-        }
+          const section = link.dataset.section;
+          activateSection(section);
+        });
       });
     });
   </script>
 </body>
 </html>
-

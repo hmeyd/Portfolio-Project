@@ -1,51 +1,130 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Articles - Registre Entreprise</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>À propos de nous</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #FFFFFF;
+      color: #1C1C1C;
+    }
+    header {
+      background-color: #0D2C54;
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .container p {
+      line-height: 1.8;
+      font-size: 1.1em;
+      margin-bottom: 30px;
+    }
+    .team {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    .member {
+      text-align: center;
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .member:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    .member img {
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+    .member h3 {
+      margin: 10px 0 5px;
+      color: #0D2C54;
+    }
+    .socials {
+      margin-top: 60px;
+      text-align: center;
+    }
+    .socials a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #0D2C54;
+      font-size: 1.5em;
+      text-decoration: none;
+    }
+    @media screen and (max-width: 600px) {
+      header h1 {
+        font-size: 1.8em;
+      }
+      .member img {
+        width: 100px;
+        height: 100px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Articles informatifs</h1>
-  <button class="accordion"> Comprendre le SIRET, le SIREN et le code APE</button>
-  <div class="panel">
-    <p>Le <strong>SIRET</strong> est un identifiant unique pour chaque établissement. Le <strong>SIREN</strong> identifie l'entreprise principale. Le <strong>code APE</strong> (ou NAF) indique l’activité principale de l’entreprise selon la nomenclature INSEE.</p>
+<header>
+  <h1>À propos de nous</h1>
+</header>
+<div class="container">
+  <p>
+  Ce site est le fruit d’un <strong>projet tutoré mené dans le cadre de notre formation à Holberton School</strong>, où nous nous spécialisons en développement web et web mobile. Accompagnés par des mentors et partenaires engagés comme le Crédit Agricole, nous avons relevé ce défi avec enthousiasme, exigence et passion.
+  </p>
+  <p>
+  Nous sommes une équipe de jeunes développeurs dynamiques, curieux et animés par l’envie d’apprendre et de construire des solutions utiles et accessibles. Ce projet est bien plus qu’un exercice : c’est une première pierre posée dans notre parcours professionnel, un espace de création où nos idées prennent vie.
+  </p>
+  <div class="team">
+    <div class="member">
+      <img src="static/myriam.jpeg" alt="Myriam">
+      <h3>Myriam</h3>
+      <p>Frontend/Backend</p>
+    </div>
+    <div class="member">
+      <img src="static/elodie.jpeg" alt="Elodie">
+      <h3>Elodie</h3>
+      <p>Frontend/Backend</p>
+    </div>
+    <div class="member">
+      <img src="static/mame.jpeg" alt="Mame">
+      <h3>Mame</h3>
+      <p>Frontend/Backend</p>
+    </div>
+    <div class="member">
+      <img src="static/ahmed.jpeg" alt="Ahmed">
+      <h3>Ahmed</h3>
+      <p>Frontend/Backend</p>
+    </div>
   </div>
-  <button class="accordion"> Que signifie une publication au BODACC ?</button>
-  <div class="panel">
-    <p>Le <strong>BODACC</strong> (Bulletin Officiel des Annonces Civiles et Commerciales) publie les événements légaux d’une entreprise : création, cession, redressement, etc. C’est une source d’information publique.</p>
+  <div class="socials">
+    <a href="https://github.com/ton-profil" target="_blank" aria-label="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+    <a href="https://twitter.com/ton-compte" target="_blank" aria-label="Twitter">
+      <i class="fab fa-twitter"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/ton-profil" target="_blank" aria-label="LinkedIn">
+      <i class="fab fa-linkedin"></i>
+    </a>
   </div>
-  <button class="accordion"> Comment lire les statuts d’une entreprise française ?</button>
-  <div class="panel">
-    <p>Les statuts définissent les règles de fonctionnement d’une société : objet, capital, associés, répartition des pouvoirs. Ils sont obligatoires et doivent être publiés lors de la création d’une entreprise.</p>
-  </div>
-  <button class="accordion"> Quelles sont les obligations légales d’un dirigeant ?</button>
-  <div class="panel">
-    <p>Un dirigeant doit déclarer ses comptes, respecter les lois fiscales et sociales, tenir une comptabilité sincère, convoquer des assemblées, et protéger les intérêts des associés et de l’entreprise.</p>
-  </div>
-  <button class="accordion"> À quoi sert le Registre du Commerce et des Sociétés (RCS) ?</button>
-  <div class="panel">
-    <p>Le <strong>RCS</strong> centralise toutes les entreprises commerciales en France. Il permet d’identifier légalement une société et d’en consulter les informations juridiques et financières.</p>
-  </div>
-  <button class="accordion"> Comment créer une entreprise en France : étapes clés</button>
-  <div class="panel">
-    <p>Choisir un statut juridique, rédiger les statuts, immatriculer l’entreprise auprès du greffe, publier une annonce légale et obtenir un numéro SIRET/SIREN sont les étapes principales.</p>
-  </div>
-  <script>
-    const acc = document.querySelectorAll(".accordion");
-    acc.forEach(button => {
-      button.addEventListener("click", function () {
-        this.classList.toggle("active");
-        const panel = this.nextElementSibling;
-        if (panel.style.display === "block") {
-          panel.style.display = "none";
-        } else {
-          panel.style.display = "block";
-        }
-      });
-    });
-  </script>
+</div>
 </body>
 </html>
